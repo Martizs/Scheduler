@@ -1,0 +1,299 @@
+import React from 'react';
+import { View, AppState } from 'react-native';
+/* styles */
+import { month, horMonth } from './style';
+/* components */
+import { Calendar } from '../../components/Calendar';
+import { IconButton } from '../../components/IconButton';
+import TaskPreview from '../../components/TaskPreview';
+import DropDownList from '../../components/DropDownList';
+/* redux */
+import { connect } from 'react-redux';
+/* utils */
+import isEqual from 'lodash/isEqual';
+/* consts */
+import {
+  titleBarHeight,
+  searchInpHeight,
+  rndTxtInputOffset,
+} from '../../consts/generalConsts';
+import { setSelMonth, setSelYear } from '../../redux/dates/actions';
+import { genDays } from '../../utils/dateUtils';
+
+class Month extends React.Component {
+  constructor(props) {
+    super();
+
+    this.state = {
+      dropDownM: false,
+      dropDownY: false,
+      resetMon: false,
+      resetYea: false,
+      portrait: true,
+      inputX: 0,
+      inputY: '-100%',
+    };
+
+    this.setCurrMY = this.setCurrMY.bind(this);
+    this.setMDropDown = this.setMDropDown.bind(this);
+    this.setYDropDown = this.setYDropDown.bind(this);
+    this.toggleMonRes = this.toggleMonRes.bind(this);
+    this.toggleYeaRes = this.toggleYeaRes.bind(this);
+    this.onMItemPress = this.onMItemPress.bind(this);
+    this.onYItemPress = this.onYItemPress.bind(this);
+    this.orienChanged = this.orienChanged.bind(this);
+    this.setInputXY = this.setInputXY.bind(this);
+  }
+
+  componentDidMount() {
+    this.orienChanged();
+    AppState.addEventListener('change', this._handleAppStateChange);
+  }
+
+  componentDidUpdate(prevProps) {
+    if (
+      !isEqual(
+        this.props.screenOrient.eventChange,
+        prevProps.screenOrient.eventChange
+      )
+    ) {
+      this.orienChanged();
+    }
+  }
+
+  componentWillUnmount() {
+    AppState.removeEventListener('change', this._handleAppStateChange);
+  }
+
+  _handleAppStateChange = (nextAppState) => {
+    if (nextAppState === 'active') {
+      this.setCurrMY();
+    }
+  };
+
+  orienChanged() {
+    const screen =
+      this.props.screenOrient.eventChange &&
+      this.props.screenOrient.eventChange.window;
+
+    // aaand we reset dropdowns on orientation change
+    this.toggleMonRes(true);
+    this.toggleYeaRes(true);
+
+    if (screen) {
+      const { width, height } = screen;
+      if (width > height) {
+        this.setState({
+          portrait: false,
+        });
+      } else {
+        this.setState({
+          portrait: true,
+        });
+      }
+    }
+  }
+
+  setCurrMY() {
+    const date = new Date();
+    const monthz = date.getMonth();
+    const year = date.getFullYear();
+
+    genDays({ month: monthz, year }, false, this.props.dispatch);
+
+    setSelMonth(monthz);
+    setSelYear(year);
+  }
+
+  setMDropDown(monthDr) {
+    const stateObj = {
+      dropDownM: monthDr,
+    };
+
+    // so basically when the dropdown dissappears
+    // we want to set the dropdown default positions
+    // to be out of screen, so that it would seemingly
+    // appear on the screen rather than moving to one position
+    // from its previous position aka switching between
+    // month and year dropdowns
+    if (!monthDr) {
+      stateObj.inputX = 0;
+      stateObj.inputY = '-100%';
+    }
+
+    this.setState(stateObj);
+  }
+
+  setYDropDown(yearDr) {
+    const stateObj = {
+      dropDownY: yearDr,
+    };
+
+    // so basically when the dropdown dissappears
+    // we want to set the dropdown default positions
+    // to be out of screen, so that it would seemingly
+    // appear on the screen rather than moving to one position
+    // from its previous position aka switching between
+    // month and year dropdowns
+    if (!yearDr) {
+      stateObj.inputX = 0;
+      stateObj.inputY = '-100%';
+    }
+
+    this.setState(stateObj);
+  }
+
+  toggleMonRes(value) {
+    this.setState({
+      resetMon: value,
+    });
+  }
+
+  toggleYeaRes(value) {
+    this.setState({
+      resetYea: value,
+    });
+  }
+
+  onMItemPress(item) {
+    this.props.dispatch(setSelMonth(item.value));
+    genDays(
+      { month: item.value, year: this.props.selDay.year },
+      false,
+      this.props.dispatch
+    );
+    this.toggleMonRes(true);
+  }
+
+  onYItemPress(item) {
+    genDays(
+      { month: this.props.selDay.month, year: item.value },
+      false,
+      this.props.dispatch
+    );
+    this.props.dispatch(setSelYear(item.value));
+    this.toggleYeaRes(true);
+  }
+
+  setInputXY(inputX, y) {
+    // Okay so the way we calculate this is, since the dropdown appears as part
+    // of the month screen and NOT part of the whole screen,
+    // and the way we place it is by marginTop marginLeft from the MONTH screen
+    // and the x & y coordinates we get are based on the whole screen,
+    // for all of that we first need to substract titleBarHeight
+    // so that the Y placement would be in line with the actual items
+    // coordinates, and then we add in searchInpHeight cause we want
+    // the dropdown to be BELOW the search input and we need that extra
+    // offset cause we don't actually get the whole height of the textInput
+    // just with our own styles, there's some internal height stuff happening
+    // in the TextInput component itself.
+    this.setState({
+      inputX,
+      inputY: y - titleBarHeight + searchInpHeight + rndTxtInputOffset,
+    });
+  }
+
+  render() {
+    const monthStyle = this.state.portrait ? month : horMonth;
+
+    const currMonYear =
+      this.props.mainMonth === this.props.initMonth &&
+      this.props.mainYear === this.props.initYear;
+
+    const prevContainer =
+      this.state.portrait && !currMonYear
+        ? {
+            ...monthStyle.prevContainer,
+            flex: 18,
+          }
+        : {
+            ...monthStyle.prevContainer,
+            flex: 20,
+          };
+
+    return (
+      <View style={monthStyle.container}>
+        {this.state.portrait && !currMonYear && (
+          <View style={monthStyle.butContainer}>
+            <View>
+              <IconButton
+                contStyle={monthStyle.but}
+                onPress={() => this.setCurrMY()}
+                iconLeft
+                iconName="refresh"
+                text="Back to current month"
+              />
+            </View>
+          </View>
+        )}
+        <View style={monthStyle.calContainer}>
+          <Calendar
+            resetMon={this.state.resetMon}
+            resetYea={this.state.resetYea}
+            toggleMonRes={this.toggleMonRes}
+            toggleYeaRes={this.toggleYeaRes}
+            setMDropDown={this.setMDropDown}
+            setYDropDown={this.setYDropDown}
+            portrait={this.state.portrait}
+            setInputXY={this.setInputXY}
+          />
+        </View>
+        <View style={prevContainer}>
+          {!this.state.portrait && !currMonYear && (
+            <View style={monthStyle.butContainer}>
+              <View>
+                <IconButton
+                  onPress={() => this.setCurrMY()}
+                  iconLeft
+                  iconName="refresh"
+                  text="Back to current month"
+                />
+              </View>
+            </View>
+          )}
+          <View style={monthStyle.prevTaskCont}>
+            <TaskPreview
+              portrait={this.state.portrait}
+              selDay={this.props.selDay}
+            />
+          </View>
+        </View>
+        {this.state.dropDownM && (
+          <DropDownList
+            dropDown={this.state.dropDownM}
+            onItemPress={this.onMItemPress}
+            tapOut={() => this.toggleMonRes(true)}
+            placement={{
+              marginTop: this.state.inputY,
+              marginLeft: this.state.inputX,
+            }}
+          />
+        )}
+        {this.state.dropDownY && (
+          <DropDownList
+            dropDown={this.state.dropDownY}
+            onItemPress={this.onYItemPress}
+            tapOut={() => this.toggleYeaRes(true)}
+            placement={{
+              marginTop: this.state.inputY,
+              marginLeft: this.state.inputX,
+            }}
+          />
+        )}
+      </View>
+    );
+  }
+}
+
+const mapStateToProps = (state) => ({
+  screenOrient: state.screenOrient,
+  selDay: state.selDay,
+  mainMonth: state.calDays.mainMonth,
+  mainYear: state.calDays.mainYear,
+});
+
+const mapDispatchToProps = (dispatch) => ({
+  dispatch,
+});
+
+export default connect(mapStateToProps, mapDispatchToProps)(Month);
