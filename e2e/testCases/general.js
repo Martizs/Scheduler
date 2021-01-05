@@ -21,3 +21,12 @@ export async function dismissNotif() {
   // and here we wait to check for the notification to actually be gone
   await waitTextToBe(nativeIds.mainText, 'gone', notifTimeout);
 }
+
+// dismisses with dont rem notification via our work around
+// and checks if it was successfull
+export async function dontRemNot() {
+  // so here we dismiss the notification
+  await pressItem(nativeIds.dontRemNot);
+  // and here we wait to check for the notification to actually be gone
+  await waitTextToBe(nativeIds.mainText, 'gone', notifTimeout);
+}

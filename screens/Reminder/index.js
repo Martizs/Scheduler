@@ -13,6 +13,7 @@ import {
 import { rem, maxListHeight } from './style';
 import { darkBasic, smallIconSize } from '../../styles/theme';
 /* components */
+import CheckBox from '@react-native-community/checkbox';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import SearchInput from '../../components/SearchInput';
 import DropDownList from '../../components/DropDownList';
@@ -105,6 +106,7 @@ class Reminder extends React.Component {
       // so 0 - onTime, 1 - same day, 2 - custom
       sameTime: inSameTime,
       notif: remData ? remData.notif : true,
+      testCheck: false,
     };
 
     this.setHDropDown = this.setHDropDown.bind(this);
@@ -369,7 +371,7 @@ class Reminder extends React.Component {
   }
 
   addUpdateReminder() {
-    const { selHour, selMin, repRem, sameTime, notif } = this.state;
+    const { selHour, selMin, repRem, sameTime, notif, testCheck } = this.state;
 
     const onlyPosRep = /^\d+$/.test(this.repNumb);
     const onlyPosBef = /^\d+$/.test(this.befNumb);
@@ -437,6 +439,7 @@ class Reminder extends React.Component {
             sameTime,
             notif,
             delete: false,
+            testCheck,
           },
         })
       );
@@ -516,6 +519,7 @@ class Reminder extends React.Component {
                           this.initTime ? befTypes : befTimedTypes
                         )
                       }
+                      testID={remIds.befDDBut}
                     >
                       <Text style={rem.befTypeDDText}>
                         {befTypeObjects[this.befType]}
@@ -584,8 +588,30 @@ class Reminder extends React.Component {
                 />
               </View>
             </View>
+            <View style={rem.section}>
+              <TouchableOpacity
+                onPress={() =>
+                  this.setState((prevState) => {
+                    return {
+                      testCheck: !prevState.testCheck,
+                    };
+                  })
+                }
+                testID={remIds.testCheck}
+              >
+                <CheckBox
+                  value={this.state.testCheck}
+                  disabled
+                  tintColors={{
+                    true: darkBasic.textColor,
+                    false: darkBasic.textColor,
+                  }}
+                />
+              </TouchableOpacity>
+            </View>
             <View style={rem.repRemCont}>
               <RepeatComp
+                rem
                 onCheck={() =>
                   this.state.repRem
                     ? this.repeatableR(false)

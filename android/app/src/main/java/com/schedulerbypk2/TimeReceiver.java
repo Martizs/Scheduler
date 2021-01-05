@@ -49,6 +49,8 @@ public class TimeReceiver extends BroadcastReceiver {
 
         int remId = intent.getExtras().getInt("remId");
 
+        int testCheck = intent.getExtras().getInt("test");
+
         helper = new MyDbAdapter(context);
         
         try{
@@ -122,64 +124,68 @@ public class TimeReceiver extends BroadcastReceiver {
                     alarmIntent.putExtra("alarm", true);
                     alarmIntent.putExtra("remWillRep", mainTimeRep);
 
-                    PendingIntent alarmScreen = PendingIntent.getActivity(context, mainTimeId, alarmIntent, PendingIntent.FLAG_ONE_SHOT);
+                    if(testCheck == 0){
+                        PendingIntent alarmScreen = PendingIntent.getActivity(context, mainTimeId, alarmIntent, PendingIntent.FLAG_ONE_SHOT);
 
-                    // Okay, i think i know whats happening, soo if one of the bellow broadcasts happen
-                    // others are counted as done as well, and the above getActivity is a different thing
+                        // Okay, i think i know whats happening, soo if one of the bellow broadcasts happen
+                        // others are counted as done as well, and the above getActivity is a different thing
 
-                    // cancel(dismiss) action set up
-                    Intent cancelIntent = new Intent(context, NotDismissRec.class);
-                    cancelIntent.putExtra("notificationId", mainTimeId);
-                    PendingIntent cancelPendIntent = PendingIntent.getBroadcast(context, mainTimeId, cancelIntent, PendingIntent.FLAG_ONE_SHOT);
+                        // cancel(dismiss) action set up
+                        Intent cancelIntent = new Intent(context, NotDismissRec.class);
+                        cancelIntent.putExtra("notificationId", mainTimeId);
+                        PendingIntent cancelPendIntent = PendingIntent.getBroadcast(context, mainTimeId, cancelIntent, PendingIntent.FLAG_ONE_SHOT);
 
-                    // dont remind again action setup
-                    Intent dontRemInt = new Intent(context, DontRemReceiver.class);
-                    dontRemInt.putExtra("notificationId", mainTimeId);
-                    PendingIntent dontRemPend = PendingIntent.getBroadcast(context, mainTimeId, dontRemInt, PendingIntent.FLAG_ONE_SHOT);
+                        // dont remind again action setup
+                        Intent dontRemInt = new Intent(context, DontRemReceiver.class);
+                        dontRemInt.putExtra("notificationId", mainTimeId);
+                        PendingIntent dontRemPend = PendingIntent.getBroadcast(context, mainTimeId, dontRemInt, PendingIntent.FLAG_ONE_SHOT);
 
-                    // On notification cancel via any other method
-                    Intent removeIntent = new Intent(context, NotRemovedRec.class);
-                    removeIntent.putExtra("notificationId", mainTimeId);
-                    PendingIntent remPendInt = PendingIntent.getBroadcast(context, mainTimeId, removeIntent, PendingIntent.FLAG_ONE_SHOT);
+                        // On notification cancel via any other method
+                        Intent removeIntent = new Intent(context, NotRemovedRec.class);
+                        removeIntent.putExtra("notificationId", mainTimeId);
+                        PendingIntent remPendInt = PendingIntent.getBroadcast(context, mainTimeId, removeIntent, PendingIntent.FLAG_ONE_SHOT);
 
-                    ApplicationInfo ai = context.getPackageManager()
-                        .getApplicationInfo(packageName, PackageManager.GET_META_DATA);
-                    Bundle bundle = ai.metaData;
-                    int resourceID = bundle.getInt("com.schedulerbypk2.ic_launcher_round");
+                        ApplicationInfo ai = context.getPackageManager()
+                            .getApplicationInfo(packageName, PackageManager.GET_META_DATA);
+                        Bundle bundle = ai.metaData;
+                        int resourceID = bundle.getInt("com.schedulerbypk2.ic_launcher_round");
 
-                    int notifLayout = bundle.getInt("com.schedulerbypk2.notification");
+                        int notifLayout = bundle.getInt("com.schedulerbypk2.notification");
 
-                    RemoteViews notificationLayout = new RemoteViews(packageName, notifLayout);
+                        RemoteViews notificationLayout = new RemoteViews(packageName, notifLayout);
 
-                    // here we set the texts for the notification
-                    notificationLayout.setTextViewText(R.id.notif_time, taskDate);
-                    notificationLayout.setTextViewText(R.id.notif_title, taskTitle);
+                        // here we set the texts for the notification
+                        notificationLayout.setTextViewText(R.id.notif_time, taskDate);
+                        notificationLayout.setTextViewText(R.id.notif_title, taskTitle);
 
-                    if(taskDesc.length() > 0){
-                        notificationLayout.setTextViewText(R.id.notif_desc, taskDesc);
-                    }
-                
-                    // Build the notification
-                    NotificationCompat.Builder builder = new NotificationCompat.Builder(context, MainActivity.CHANNEL_ID)
-                        .setSmallIcon(resourceID)
-                        .setStyle(new NotificationCompat.DecoratedCustomViewStyle())
-                        .setCustomContentView(notificationLayout)
-                        .setPriority(NotificationCompat.PRIORITY_MAX)
-                        .setCategory(NotificationCompat.CATEGORY_ALARM)
-                        .setAutoCancel(true)
-                        .setFullScreenIntent(alarmScreen, true)
-                        .setDeleteIntent(remPendInt)
-                        .addAction(resourceID, "dismiss", cancelPendIntent);
+                        if(taskDesc.length() > 0){
+                            notificationLayout.setTextViewText(R.id.notif_desc, taskDesc);
+                        }
                     
-                    if(mainTimeRep) {
-                        builder.addAction(resourceID, "don't remind again", dontRemPend);
+                        // Build the notification
+                        NotificationCompat.Builder builder = new NotificationCompat.Builder(context, MainActivity.CHANNEL_ID)
+                            .setSmallIcon(resourceID)
+                            .setStyle(new NotificationCompat.DecoratedCustomViewStyle())
+                            .setCustomContentView(notificationLayout)
+                            .setPriority(NotificationCompat.PRIORITY_MAX)
+                            .setCategory(NotificationCompat.CATEGORY_ALARM)
+                            .setAutoCancel(true)
+                            .setFullScreenIntent(alarmScreen, true)
+                            .setDeleteIntent(remPendInt)
+                            .addAction(resourceID, "dismiss", cancelPendIntent);
+                        
+                        if(mainTimeRep) {
+                            builder.addAction(resourceID, "don't remind again", dontRemPend);
+                        }
+
+
+                        // and finally we notify
+                        NotificationManagerCompat notificationManager = NotificationManagerCompat.from(context);
+                        // notificationId is a unique int for each notification that you must define
+                        notificationManager.notify(mainTimeId, builder.build());
+                    } else {
+                        context.startActivity(alarmIntent);
                     }
-
-
-                    // and finally we notify
-                    NotificationManagerCompat notificationManager = NotificationManagerCompat.from(context);
-                    // notificationId is a unique int for each notification that you must define
-                    notificationManager.notify(mainTimeId, builder.build());
                 }
 
                 if(playerRel || !alarmPlayer.isPlaying()) {

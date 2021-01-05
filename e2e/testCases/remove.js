@@ -71,21 +71,24 @@ export async function remTask(navId, taskTitle, rep, viaOpts, lPress) {
       await waitElNotVis(appIds.modBut(0), 3000);
     }
 
-    // we wait to be redirected to the previous screen
-    await hasTxt(getTitText(navId), titBarIds.titText);
+    if (navId) {
+      // we wait to be redirected to the previous screen
+      await hasTxt(getTitText(navId), titBarIds.titText);
+    }
+
     // and to make sure that it has been removed we wait for the task title to NOT be visible
     await txtNotVis(taskTitle);
   }
 }
 
 // assumes that the daytask list is visible already
-export async function remRem(taskTitle, updtInd) {
+export async function remRem(taskTitle, updtInd, checkIndex = updtInd) {
   await editTaskNav(taskTitle);
 
   await pressItem(remPrevIds.delRemBut(updtInd));
 
   // and we also check if it has been removed
-  await waitElNotVis(remPrevIds.mainRemBut(updtInd), 2000);
+  await waitElNotVis(remPrevIds.mainRemBut(checkIndex), 2000);
 
   await pressItem(taskIds.addBut);
 }

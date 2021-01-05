@@ -8,4 +8,6 @@ export const remIds = {
   minInp: 'remMinInp',
   addUptBut: 'addUptBut',
   befInput: 'befInput',
+  testCheck: 'testCheck',
+  befDDBut: 'befDDBut',
 };

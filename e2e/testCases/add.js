@@ -15,11 +15,44 @@ import { titBarIds } from '../../components/TitleBar/testIds';
 import { remPrevIds } from '../../screens/Task/components/RemPrev/testIds';
 import { actMenIds } from '../../screens/ActionMenu/testIds';
 
+export async function addTask(
+  navId,
+  title,
+  desc,
+  tHours,
+  tMins,
+  repNum,
+  repType
+) {
+  await taskFillNav(navId, title, desc, tHours, tMins, repNum, repType);
+  await pressItem(taskIds.addBut);
+  await hasTxt(getTitText(navId), titBarIds.titText);
+}
+
 // already assumes that its able to press on the
 // add reminder button with no other preconditions
-export async function addReminder(sameTime, notif, hours, mins, befMins) {
+export async function addReminder(
+  sameTime,
+  notif,
+  hours,
+  mins,
+  befMins,
+  befType,
+  repRem,
+  testCheck
+) {
   await pressItem(remPrevIds.addRem);
-  await remFill(sameTime, notif, hours, mins, befMins);
+  await remFill(
+    sameTime,
+    notif,
+    hours,
+    mins,
+    befMins,
+    befType,
+    repRem,
+    false,
+    testCheck
+  );
   await pressItem(remIds.addUptBut);
 }
 
@@ -35,7 +68,10 @@ export async function addItemRem(
   tHours,
   tMins,
   befMins,
-  repNum
+  repNum,
+  repRem,
+  testCheck,
+  befType
 ) {
   await taskFillNav(navId, title, desc, tHours, tMins, repNum);
   if (sameTime > 0) {
@@ -48,11 +84,23 @@ export async function addItemRem(
       await waitElNotVis(remPrevIds.mainRemBut(0), 2000);
     }
 
-    await addReminder(sameTime, notif, remHours, remMins, befMins);
+    await addReminder(
+      sameTime,
+      notif,
+      remHours,
+      remMins,
+      befMins,
+      befType,
+      repRem,
+      testCheck
+    );
   }
 
   await pressItem(taskIds.addBut);
-  await hasTxt(getTitText(navId), titBarIds.titText);
+
+  if (navId) {
+    await hasTxt(getTitText(navId), titBarIds.titText);
+  }
 }
 
 // adds an item with a rem with full
@@ -202,21 +250,36 @@ export async function addEarLaterRems(
     repNum
   );
 
-  await editTaskNav(taskData.title);
-
   const lRTime = latRTime && genFutTime(latRTime);
 
-  await addReminder(
+  await addRemToTask(
+    taskData.title,
+    lRTime.futHours,
+    lRTime.futMins,
     lSameTime,
-    true,
-    lRTime && lRTime.futHours,
-    lRTime && lRTime.futMins,
     befMins
   );
+}
+
+// convenience function to add reminder to an existing task
+// from the day tasks list
+export async function addRemToTask(
+  taskTitle,
+  hours,
+  minutes,
+  sameTime,
+  befMins,
+  notCal
+) {
+  await editTaskNav(taskTitle);
+
+  await addReminder(sameTime, true, hours, minutes, befMins);
 
   await hasTxt('Task', titBarIds.titText);
 
   await pressItem(taskIds.addBut);
 
-  await hasTxt('Calendar', titBarIds.titText);
+  if (!notCal) {
+    await hasTxt('Calendar', titBarIds.titText);
+  }
 }

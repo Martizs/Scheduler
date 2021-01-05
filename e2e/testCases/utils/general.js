@@ -27,3 +27,10 @@ export function genFutTime(extraTime) {
 
   return { futHours, futMins };
 }
+
+export function addZeroT(item) {
+  // we turn it into string just in case
+  const itemz = item + '';
+
+  return itemz && itemz.length === 1 ? `0${itemz}` : itemz;
+}

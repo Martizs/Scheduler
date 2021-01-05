@@ -1,0 +1,68 @@
+emulator: autoconfig: -skin pixel_silver
+emulator: autoconfig: -skindir D:\Programz\AndroidStudioSDK\skins\
+emulator: autoconfig: -kernel D:\Programz\AndroidStudioSDK\system-images\android-28\default\x86_64\\kernel-ranchu
+emulator: Target arch = 'x86_64'
+emulator: Auto-detect: Kernel image requires new device naming scheme.
+emulator: Auto-detect: Kernel does not support YAFFS2 partitions.
+emulator: autoconfig: -ramdisk D:\Programz\AndroidStudioSDK\system-images\android-28\default\x86_64\\ramdisk.img
+emulator: Using initial system image: D:\Programz\AndroidStudioSDK\system-images\android-28\default\x86_64\\system.img
+emulator: Using initial vendor image: D:\Programz\AndroidStudioSDK\system-images\android-28\default\x86_64\\vendor.img
+emulator: autoconfig: -data C:\Users\elbar\.android\avd\First_Detox_-_API_28.avd\userdata-qemu.img
+emulator: autoconfig: -initdata C:\Users\elbar\.android\avd\First_Detox_-_API_28.avd\userdata.img
+emulator: autoconfig: -cache C:\Users\elbar\.android\avd\First_Detox_-_API_28.avd\cache.img
+emulator: autoconfig: -sdcard C:\Users\elbar\.android\avd\First_Detox_-_API_28.avd\sdcard.img
+emulator: Physical RAM size: 1536MB
+
+emulator: VM heap size 228MB is below hardware specified minimum of 384MB,setting it to that value
+emulator: System image is read only
+emulator: Found 4 DNS servers: 77.88.8.8 77.88.8.1 fe80::5ad5:6eff:fe9d:6e15 fec0:0:0:ffff::1
+emulator: VERBOSE: System.cpp:3004: querying file version info API...
+emulator: VERBOSE: System.cpp:3012: found kernelbase.dll
+emulator: VERBOSE: System.cpp:3020: GetFileVersionInfoSizeW found. On Windows 10?
+emulator: VERBOSE: System.cpp:3029: GetFileVersionInfoW found. On Windows 10?
+emulator: VERBOSE: System.cpp:3059: VerQueryValueW found. Can query file versions
+emulator: VERBOSE: System.cpp:3082: queryFileVersionInfo: path not found: amdvlk64.dll
+emulator: VERBOSE: System.cpp:3004: querying file version info API...
+emulator: VERBOSE: System.cpp:3082: queryFileVersionInfo: path not found: amdvlk32.dll
+emulator: VERBOSE: System.cpp:3004: querying file version info API...
+emulator: ERROR: Running multiple emulators with the same AVD is an experimental feature.
+Please use -read-only flag to enable this feature.
+
+emulator: Android emulator version 30.2.5.0 (build_id 6953278) (CL:N/A)
+emulator: Found AVD name 'First_Detox_API_28'
+emulator: Found AVD target architecture: x86_64
+emulator: argv[0]: 'D:\Programz\AndroidStudioSDK\emulator\emulator.EXE'; program directory: 'D:\Programz\AndroidStudioSDK\emulator'
+emulator:  Found directory: D:\Programz\AndroidStudioSDK\system-images\android-28\default\x86_64\
+
+emulator: emuDirName: 'D:\Programz\AndroidStudioSDK\emulator'
+emulator: try dir D:\Programz\AndroidStudioSDK\emulator
+emulator: Trying emulator path 'D:\Programz\AndroidStudioSDK\emulator\qemu\windows-x86_64\qemu-system-x86_64.exe'
+emulator: Found target-specific 64-bit emulator binary: D:\Programz\AndroidStudioSDK\emulator\qemu\windows-x86_64\qemu-system-x86_64.exe
+emulator: Adding library search path: 'D:\Programz\AndroidStudioSDK\emulator\lib64'
+emulator: Adding library search path: 'D:\Programz\AndroidStudioSDK\emulator\lib64\gles_angle'
+emulator: Adding library search path: 'D:\Programz\AndroidStudioSDK\emulator\lib64\gles_angle9'
+emulator: Adding library search path: 'D:\Programz\AndroidStudioSDK\emulator\lib64\gles_angle11'
+emulator: Adding library search path: 'D:\Programz\AndroidStudioSDK\emulator\lib64\gles_swiftshader'
+emulator: Adding library search path for Qt: 'D:\Programz\AndroidStudioSDK\emulator\lib64\qt\lib'
+emulator: Silencing all qWarning(); use qCWarning(...) instead: QT_LOGGING_RULES=default.warning=false
+emulator: Setting Qt plugin search path: QT_QPA_PLATFORM_PLUGIN_PATH=D:\Programz\AndroidStudioSDK\emulator\lib64\qt\plugins
+emulator: Setting Qt to use software OpenGL: QT_OPENGL=software
+emulator: Setting QML to use software QtQuick2D: QMLSCENE_DEVICE=softwarecontext
+emulator: Overriding pre-existing bad Qt high dpi settings...
+emulator: Quoted param: [D:\Programz\AndroidStudioSDK\emulator\qemu\windows-x86_64\qemu-system-x86_64.exe]
+emulator: Quoted param: [-verbose]
+emulator: Quoted param: [-no-audio]
+emulator: Quoted param: [-no-boot-anim]
+emulator: Quoted param: [-port]
+emulator: Quoted param: [17538]
+emulator: Quoted param: [@First_Detox_API_28]
+emulator: Running :D:\Programz\AndroidStudioSDK\emulator\qemu\windows-x86_64\qemu-system-x86_64.exe
+emulator: qemu backend: argv[00] = "D:\Programz\AndroidStudioSDK\emulator\qemu\windows-x86_64\qemu-system-x86_64.exe"
+emulator: qemu backend: argv[01] = "-verbose"
+emulator: qemu backend: argv[02] = "-no-audio"
+emulator: qemu backend: argv[03] = "-no-boot-anim"
+emulator: qemu backend: argv[04] = "-port"
+emulator: qemu backend: argv[05] = "17538"
+emulator: qemu backend: argv[06] = "@First_Detox_API_28"
+emulator: Concatenated backend parameters:
+ D:\Programz\AndroidStudioSDK\emulator\qemu\windows-x86_64\qemu-system-x86_64.exe -verbose -no-audio -no-boot-anim -port 17538 @First_Detox_API_28

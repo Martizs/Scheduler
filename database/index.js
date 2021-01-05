@@ -77,6 +77,7 @@ export async function createDb() {
         ${remTFields.task_rem_id} VARCHAR(20),
         ${remTFields.task_done} BOOLEAN,
         ${remTFields.time_id} INTEGER NOT NULL,
+        ${remTFields.test_check} BOOLEAN,
         FOREIGN KEY (${remTFields.time_id}) REFERENCES times(id) ON DELETE CASCADE
         )`,
       []
@@ -222,6 +223,7 @@ function createFresh() {
           ${remTFields.task_rem_id} VARCHAR(20),
           ${remTFields.task_done} BOOLEAN,
           ${remTFields.time_id} INTEGER NOT NULL,
+          ${remTFields.test_check} BOOLEAN,
           FOREIGN KEY (${remTFields.time_id}) REFERENCES times(id) ON DELETE CASCADE
           )`,
           [],
@@ -284,11 +286,11 @@ export function test(params) {
   db.transaction((txn) => {
     // NOTE: so there needs to be as many question marks as there are values you inserting
     txn.executeSql(
-      `SELECT * FROM ${remTable} WHERE req_code IS NOT NULL`,
+      `SELECT * FROM ${remTable}`,
       [],
       (tx0, res0) => {
         console.log('results.rows.length', res0.rows.length);
-        for (let i = res0.rows.length - 10; i < res0.rows.length; i++) {
+        for (let i = 0; i < res0.rows.length; i++) {
           console.log('task', res0.rows.item(i));
         }
       },

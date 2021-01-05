@@ -59,4 +59,28 @@ public class NativeTest extends ReactContextBaseJavaModule {
         }
     }
 
+    @ReactMethod
+    public void dontRemNotif(int mainTimeId, Callback successCallback) {
+        try {
+            MyDbAdapter dbAdapter = new MyDbAdapter(reactContext);
+
+            String resp = dbAdapter.dontRepRem(mainTimeId);
+
+            if(resp.indexOf("error") != -1) {
+                Utils.onError(reactContext, -1, -1, "DontRemReceiver db update error: " + resp);
+            }
+
+            Utils.stopMedia(reactContext);
+            Utils.cancelPendings(reactContext, mainTimeId);
+
+            NotificationManagerCompat notificationManager = NotificationManagerCompat.from(reactContext);
+                
+            notificationManager.cancel(mainTimeId);
+
+            successCallback.invoke("Notif dont remcanceled");
+        } catch(Exception e) {
+            Utils.onError(reactContext, -1, -1, "dontRemNotif error: " + e.getMessage());
+        }
+    }
+
 }

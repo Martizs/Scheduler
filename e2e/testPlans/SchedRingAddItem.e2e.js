@@ -21,7 +21,6 @@ import { genFutTime } from '../testCases/utils/general';
 describe('ScheduleRing - Add Item Basic', () => {
   //   /* via calendar */
   // TODO: remove this after finishing all them test plans
-
   it('Random test', () => openApp());
 
   // it('Add item and on time rem via calendar', async function () {

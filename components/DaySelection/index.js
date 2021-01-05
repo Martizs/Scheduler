@@ -56,6 +56,7 @@ const DaySelection = (props) => {
       </TouchableOpacity>
       <View style={daySel.searchCont}>
         <SearchInput
+          testID={daySelIds.yearInp}
           setDropDown={props.setYDropDown}
           itemSel={year + ''}
           data={yearData}
@@ -65,6 +66,7 @@ const DaySelection = (props) => {
           setInputXY={props.setInputXY}
         />
         <SearchInput
+          testID={daySelIds.monthInp}
           setDropDown={props.setMDropDown}
           itemSel={getMonthName(month)}
           data={monthData}
@@ -73,6 +75,7 @@ const DaySelection = (props) => {
           setInputXY={props.setInputXY}
         />
         <SearchInput
+          testID={daySelIds.dayInp}
           setDropDown={props.setDDropDown}
           itemSel={day + ''}
           data={daysData}

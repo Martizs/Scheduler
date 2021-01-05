@@ -5,6 +5,8 @@ import {
   elVis,
   replaceTxt,
   pressBack,
+  waitElVis,
+  checkPress,
 } from './testSteps/general';
 import { navigate } from './nav';
 /* consts */
@@ -31,24 +33,97 @@ export async function autoFillDDInp(inpId, txt) {
 // reminder screen fill
 // also checks if the reminder screen has opened
 // fills values only if values are provided
-export async function remFill(sameTime, notif, hours, mins, befMins) {
+// Note for before reminders, if rHours and rMinutes have been passed in
+// its assumed that tHours and tMins are not present on the task
+export async function remFill(
+  sameTime,
+  notif,
+  hours,
+  mins,
+  befMins,
+  befType,
+  repRem,
+  repUpt,
+  testCheck
+) {
   await hasTxt('Reminder', titBarIds.titText);
+
   //   presses one of the radio buttons
   if (sameTime === 0) {
     await pressItem(remIds.onTimeCheck);
   } else if (sameTime === 1) {
     await pressItem(remIds.sameDayCheck);
-    await autoFillDDInp(remIds.hourInp, hours);
-    await autoFillDDInp(remIds.minInp, mins);
+    if (hours && mins) {
+      await autoFillDDInp(remIds.hourInp, hours);
+      await autoFillDDInp(remIds.minInp, mins);
+    }
   } else {
     await pressItem(remIds.befCheck);
-    await replaceTxt(remIds.befInput, befMins);
+
+    // we do this cause of stupid leftover input focus
+    // in task screen
+    await checkPress(remIds.befDDBut, remIds.befCheck);
+
+    if (befType) {
+      await pressItem(remIds.befDDBut);
+
+      await waitElVis(dropDownIds.ddItem(0));
+
+      switch (befType) {
+        case 'mins':
+          await pressItem(dropDownIds.ddItem(0));
+          break;
+        case 'hours':
+          await pressItem(dropDownIds.ddItem(1));
+          break;
+        case 'days': {
+          if (hours && mins) {
+            await pressItem(dropDownIds.ddItem(0));
+          } else {
+            await pressItem(dropDownIds.ddItem(2));
+          }
+          break;
+        }
+        case 'weeks':
+          if (hours && mins) {
+            await pressItem(dropDownIds.ddItem(1));
+          } else {
+            await pressItem(dropDownIds.ddItem(3));
+          }
+          break;
+      }
+    }
+
+    if (hours && mins && (befType === 'days' || befType === 'weeks')) {
+      await autoFillDDInp(remIds.hourInp, hours);
+      await autoFillDDInp(remIds.minInp, mins);
+    }
+
+    if (befMins) {
+      await replaceTxt(remIds.befInput, befMins);
+    }
+  }
+
+  if (testCheck) {
+    await pressItem(remIds.testCheck);
   }
 
   if (notif) {
     await pressItem(remIds.notCheck);
   } else {
     await pressItem(remIds.alCheck);
+  }
+
+  if (repRem) {
+    if (!repUpt) {
+      await pressItem(repCompIds.repCheck + 'rem');
+    }
+
+    if (repRem !== '0') {
+      await replaceTxt(repCompIds.repInp + 'rem', repRem);
+      // closing the keyboard
+      await pressBack();
+    }
   }
 }
 
@@ -59,7 +134,7 @@ export async function remFill(sameTime, notif, hours, mins, befMins) {
 // and will press on the minutes
 // NOTE: for everything to work properly, task title should be
 // kept unique
-export async function taskFill(tit, desc, hours, mins, repNum, updt) {
+export async function taskFill(tit, desc, hours, mins, repNum, updt, repType) {
   await hasTxt('Task', titBarIds.titText);
 
   // NOTE: this currently works only with the default
@@ -72,6 +147,30 @@ export async function taskFill(tit, desc, hours, mins, repNum, updt) {
   if (repNum) {
     if (!updt) {
       await pressItem(repCompIds.repCheck);
+
+      if (repType) {
+        await pressItem(repCompIds.repDD);
+
+        await waitElVis(dropDownIds.ddItem(0));
+
+        switch (repType) {
+          case 'days':
+            await pressItem(dropDownIds.ddItem(0));
+            break;
+          case 'weeks':
+            await pressItem(dropDownIds.ddItem(1));
+            break;
+          case 'months':
+            await pressItem(dropDownIds.ddItem(2));
+            break;
+          case 'years':
+            await pressItem(dropDownIds.ddItem(3));
+            break;
+          default:
+            await pressItem(dropDownIds.ddItem(0));
+            break;
+        }
+      }
 
       await replaceTxt(repCompIds.repInp, repNum);
       // after typing text we have to remove the keyboard
@@ -87,6 +186,7 @@ export async function taskFill(tit, desc, hours, mins, repNum, updt) {
   if (desc) {
     await replaceTxt(taskIds.descInp, desc);
   }
+
   // after typing text we have to remove the keyboard
   await pressBack();
 
@@ -97,9 +197,19 @@ export async function taskFill(tit, desc, hours, mins, repNum, updt) {
 }
 
 // entering task screen and filling it
-// TODO: you can do it via day tasks
-export async function taskFillNav(navId, tit, desc, hours, mins, repNum) {
-  await navigate(navId);
+export async function taskFillNav(
+  navId,
+  tit,
+  desc,
+  hours,
+  mins,
+  repNum,
+  repType
+) {
+  if (navId) {
+    await navigate(navId);
+  }
+
   await pressItem(appIds.floatAdd);
-  await taskFill(tit, desc, hours, mins, repNum);
+  await taskFill(tit, desc, hours, mins, repNum, false, repType);
 }

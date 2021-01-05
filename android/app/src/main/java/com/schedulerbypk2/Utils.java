@@ -24,7 +24,7 @@ import android.os.Vibrator;
 interface Utils {
 
     public static void setTime(Context context, Integer reqCode, Integer remId, 
-                Integer year, Integer month, Integer day, Integer hour, Integer minute){
+                Integer year, Integer month, Integer day, Integer hour, Integer minute, Integer test) {
 
         AlarmManager am = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
         Calendar calendar = Calendar.getInstance();
@@ -39,6 +39,7 @@ interface Utils {
         Intent intent = new Intent(context, TimeReceiver.class);
         // we pass in the reminder id to this receiver
         intent.putExtra("remId", remId);
+        intent.putExtra("test", test);
         PendingIntent sender = PendingIntent.getBroadcast(context, reqCode, intent, PendingIntent.FLAG_ONE_SHOT);
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
@@ -50,6 +51,12 @@ interface Utils {
                 am.set(AlarmManager.RTC_WAKEUP, calendar.getTimeInMillis(), sender);
             }
         }
+    }
+
+    public static void setTime(Context context, Integer reqCode, Integer remId, 
+            Integer year, Integer month, Integer day, Integer hour, Integer minute) {
+
+            setTime(context, reqCode, remId, year, month, day, hour, minute, 0);
     }
 
     public static void onError(Context context, Integer mainTimeId, int rngCode, String error){

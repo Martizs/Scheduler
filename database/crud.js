@@ -139,6 +139,7 @@ export async function remCrud(
                 done: currDate > ringDate.toISOString() ? 1 : 0,
                 task_rem_id: taskRemId,
                 time_id: timeId,
+                test_check: reminder.testCheck,
               });
             }
 

@@ -25,6 +25,7 @@ import {
 } from '../../schedule';
 /* consts */
 import { backgroundImage } from '../../consts/generalConsts';
+import { alarmIds } from './testIds';
 /* database */
 import { getTimeTasks } from '../../database/retrievers';
 import { dispatchDbCall } from '../../database/helpers';
@@ -187,6 +188,7 @@ class Alarm extends React.Component {
 
           {timeTask && this.props.remWillRep && (
             <TouchableOpacity
+              testID={alarmIds.dontRem}
               style={{
                 ...alarm.button,
                 borderColor: darkBasic.buttTypes.error,
@@ -200,6 +202,7 @@ class Alarm extends React.Component {
           <View style={alarm.butSurCont}>
             <View style={alarm.butContainer}>
               <TouchableOpacity
+                testID={alarmIds.dismiss}
                 style={{
                   ...alarm.button,
                   borderColor: darkBasic.buttTypes.info,
@@ -209,16 +212,20 @@ class Alarm extends React.Component {
                 <Text style={textContainer.style}>Dismiss</Text>
               </TouchableOpacity>
               <TouchableOpacity
+                testID={alarmIds.toApp}
                 style={{
                   ...alarm.button,
                   borderColor: darkBasic.buttTypes.nav,
                 }}
                 onPress={() => this.onDontRemSave(true)}
               >
-                <Text style={textContainer.style}>Go to app</Text>
+                <Text testID={alarmIds.toAppTxt} style={textContainer.style}>
+                  Go to app
+                </Text>
               </TouchableOpacity>
               {this.state.ringing && (
                 <TouchableOpacity
+                  testID={alarmIds.stop}
                   style={{
                     ...alarm.button,
                     borderColor: darkBasic.buttTypes.error,

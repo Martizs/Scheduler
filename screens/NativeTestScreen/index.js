@@ -34,6 +34,15 @@ export const NativeTestScreen = (props) => {
     });
   };
 
+  const dontRemNotif = async () => {
+    // so here after we receive the notification we dismiss it
+    NativeTest.dontRemNotif(mainTimIds[0], () => {
+      // and here we check if it actuall has been dismissed
+      // with a little timeout of 3 seconds
+      setTimeout(checkIfNotifOpened, 3000);
+    });
+  };
+
   React.useEffect(() => {
     const eventEmitter = new NativeEventEmitter(NativeModules.NativeTest);
     const eventListener = eventEmitter.addListener(
@@ -62,6 +71,13 @@ export const NativeTestScreen = (props) => {
         // in the test, cause its removed waaay fast
         onPress={() => setTimeout(dismissNotif, 2000)}
         text="Dismiss notif"
+      />
+      <GenButton
+        testID={nativeIds.dontRemNot}
+        // we time out this so we could see the notification
+        // in the test, cause its removed waaay fast
+        onPress={() => setTimeout(dontRemNotif, 2000)}
+        text="Dont rem notif"
       />
     </View>
   );

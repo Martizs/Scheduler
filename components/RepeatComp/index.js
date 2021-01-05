@@ -17,7 +17,7 @@ export class RepeatComp extends React.Component {
           <View style={repComp.container}>
             <TouchableOpacity
               onPress={() => this.props.onCheck()}
-              testID={repCompIds.repCheck}
+              testID={`${repCompIds.repCheck}${this.props.rem ? 'rem' : ''}`}
             >
               <CheckBox
                 value={this.props.repTask}
@@ -36,7 +36,7 @@ export class RepeatComp extends React.Component {
             <View style={repComp.repContainer}>
               <Text style={repComp.repText}>Every</Text>
               <TextInput
-                testID={repCompIds.repInp}
+                testID={`${repCompIds.repInp}${this.props.rem ? 'rem' : ''}`}
                 style={repComp.numbTextInput}
                 placeholder="Number"
                 keyboardType="numeric"
@@ -48,6 +48,7 @@ export class RepeatComp extends React.Component {
               />
               <View>
                 <TouchableOpacity
+                  testID={repCompIds.repDD}
                   ref={(ref) => {
                     this.props.setTypeRef(ref);
                   }}

@@ -275,8 +275,9 @@ public class MyDbAdapter {
                 int day = calendar.get(Calendar.DAY_OF_MONTH);
                 int hour = calendar.get(Calendar.HOUR_OF_DAY);
                 int minute = calendar.get(Calendar.MINUTE);
+                int testCheck = (int) newRingRem.get(0).get("test_check");
 
-                Utils.setTime(dbContext, reqCode, remId, year, month, day, hour, minute);
+                Utils.setTime(dbContext, reqCode, remId, year, month, day, hour, minute, testCheck);
 
                 // and we update the newly set timed reminder
                 SQLiteDatabase db = myhelper.getWritableDatabase();
@@ -577,6 +578,7 @@ public class MyDbAdapter {
         ContentValues newRem = new ContentValues(rem);
 
         try {
+            Calendar currDate = Calendar.getInstance();
             Calendar ringDate = Calendar.getInstance();
 
             ringDate.set(Integer.parseInt(dateItem.get("year").toString()), 
@@ -627,7 +629,7 @@ public class MyDbAdapter {
             newRem.put("time_id", timeId);
 
             newRem.remove("done");
-            newRem.put("done", 0);
+            newRem.put("done", currDate.getTime().after(ringDate.getTime()));
 
             newRem.remove("task_done");
             newRem.put("task_done", 0);
@@ -836,8 +838,10 @@ public class MyDbAdapter {
                                     int tTaskId = (int) tItem.get("id");
 
                                     if(tTaskId == taskId) {
-                                        tHours = Integer.parseInt(tItem.get("hours").toString());
-                                        tMins = Integer.parseInt(tItem.get("minutes").toString());
+                                        if(tItem.get("hours").toString().length() != 0 && tItem.get("minutes").toString().length() != 0){
+                                            tHours = Integer.parseInt(tItem.get("hours").toString());
+                                            tMins = Integer.parseInt(tItem.get("minutes").toString());
+                                        }
                                         break;
                                     }
                                 }

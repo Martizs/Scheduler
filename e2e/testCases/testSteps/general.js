@@ -1,8 +1,14 @@
+import { notifTimeout } from '../consts/general';
+
 // IMPORTANT FLOW OF LOGIC TEST STEPS - these are aranges of actions
 // and expects to form some sort of a step
 
 export async function reload() {
   await device.reloadReactNative();
+}
+
+export async function openAppBackgr() {
+  await device.launchApp({ newInstance: false });
 }
 
 export async function pressBack() {
@@ -23,14 +29,14 @@ export async function elNotVis(idStr) {
 }
 
 // waits for element to become visible
-export async function waitElVis(idStr, timeOut) {
+export async function waitElVis(idStr, timeOut = notifTimeout) {
   await waitFor(element(by.id(idStr)))
     .toBeVisible()
     .withTimeout(timeOut);
 }
 
 // waits for element to dissapear
-export async function waitElNotVis(idStr, timeOut) {
+export async function waitElNotVis(idStr, timeOut = notifTimeout) {
   await waitFor(element(by.id(idStr)))
     .not.toBeVisible()
     .withTimeout(timeOut);
@@ -90,11 +96,25 @@ export async function containTxt(txt, idStr) {
     const endInd = txtPart.indexOf(',');
     const elementText = txtPart.substring(0, endInd);
 
-    if (elementText.indexOf(txt) !== -1) {
+    if (elementText.toLowerCase().indexOf(txt.toLowerCase()) !== -1) {
       return true;
     }
 
     throw `Element '${idStr}' does NOT contain '${txt}'`;
+  }
+}
+
+// util function to press an item again if a
+// required item is not visible - this is mainly to
+// overwork the retarded input focus still being relevant
+// and fuking up clicks in another screen
+export async function checkPress(checkId, pressId) {
+  try {
+    await elVis(checkId);
+  } catch (error) {
+    await pressItem(pressId);
+
+    return true;
   }
 }
 

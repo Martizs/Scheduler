@@ -32,6 +32,7 @@ export const remTFields = {
   task_rem_id: 'task_rem_id',
   task_done: 'task_done',
   time_id: 'time_id',
+  test_check: 'test_check',
 };
 export const setTable = 'settings';
-export const setTFields = {defSort: 'defSort'};
+export const setTFields = { defSort: 'defSort' };

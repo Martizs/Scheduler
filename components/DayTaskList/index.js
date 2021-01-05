@@ -138,9 +138,28 @@ class DayTaskList extends React.Component {
       this.props.screenKey !== prevProps.screenKey ||
       !isEqual(this.props.selDay, prevProps.selDay)
     ) {
-      dispatchDbCall(() =>
-        getTimeTasks(true, { year, month: month + 1, day }, this.setDayTasks)
-      );
+      // TODO: remove this, if its unnecesary, currently we leave it
+      // for testing purposes
+      if (
+        this.props.selDay?.month !== prevProps.selDay?.month ||
+        this.props.selDay?.year !== prevProps.selDay?.year
+      ) {
+        dispatchDbCall(() =>
+          createRep(year, month, () =>
+            dispatchDbCall(() =>
+              getTimeTasks(
+                true,
+                { year, month: month + 1, day },
+                this.setDayTasks
+              )
+            )
+          )
+        );
+      } else {
+        dispatchDbCall(() =>
+          getTimeTasks(true, { year, month: month + 1, day }, this.setDayTasks)
+        );
+      }
     }
 
     if (this.props.defSort !== prevProps.defSort) {
