@@ -8,7 +8,7 @@ import { hasTxt, pressItem } from '../testCases/testSteps/general';
 import { checkNotif } from '../testCases/check';
 import { dismissNotif, openApp } from '../testCases/general';
 import { remTask } from '../testCases/remove';
-import { editTaskNav, navToDay } from '../testCases/nav';
+import { editTaskNav, navigate, navToDay } from '../testCases/nav';
 /* utils */
 import { genFutTime } from '../testCases/utils/general';
 /* consts */
@@ -243,4 +243,65 @@ describe('ScheduleRing - Done Task', () => {
 
   //   await remTask(actMenIds.calAct, taskData.title, true, true);
   // });
+
+  // it('Done a repeated reminders task', async function () {
+  //   const time = genFutTime(120000);
+  //   // on time rem
+  //   await addItemRem(
+  //     actMenIds.calAct,
+  //     taskData.title,
+  //     '',
+  //     1,
+  //     true,
+  //     time.futHours,
+  //     time.futMins,
+  //     false,
+  //     false,
+  //     false,
+  //     false,
+  //     '2'
+  //   );
+
+  //   await checkNotif();
+  //   await dismissNotif();
+
+  //   await checkNotif();
+  //   await dismissNotif();
+
+  //   await navigate(actMenIds.todAct);
+  //   await pressItem(`${tItemIds.checkBox}-${taskData.title}`);
+
+  //   await checkNotif(true);
+
+  //   await remTask(actMenIds.calAct, taskData.title, false, true);
+  // });
+
+  it('Doning and undoning a task after its reminder has doned itself ', async function () {
+    const time = genFutTime(120000);
+    // on time rem
+    await addItemRem(
+      actMenIds.calAct,
+      taskData.title,
+      '',
+      1,
+      true,
+      time.futHours,
+      time.futMins,
+      false,
+      false,
+      false,
+      false
+    );
+
+    await checkNotif();
+    await dismissNotif();
+
+    await navigate(actMenIds.todAct);
+    await pressItem(`${tItemIds.checkBox}-${taskData.title}`);
+    await pressItem(`${tItemIds.checkBox}-${taskData.title}`);
+
+    await checkNotif(true);
+
+    await remTask(actMenIds.calAct, taskData.title, false, true);
+  });
 });

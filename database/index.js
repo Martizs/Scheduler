@@ -77,7 +77,7 @@ export async function createDb() {
         ${remTFields.task_rem_id} VARCHAR(20),
         ${remTFields.task_done} BOOLEAN,
         ${remTFields.time_id} INTEGER NOT NULL,
-        ${remTFields.test_check} BOOLEAN,
+        ${remTFields.test_check} BOOLEAN DEFAULT 0,
         FOREIGN KEY (${remTFields.time_id}) REFERENCES times(id) ON DELETE CASCADE
         )`,
       []
@@ -223,7 +223,7 @@ function createFresh() {
           ${remTFields.task_rem_id} VARCHAR(20),
           ${remTFields.task_done} BOOLEAN,
           ${remTFields.time_id} INTEGER NOT NULL,
-          ${remTFields.test_check} BOOLEAN,
+          ${remTFields.test_check} BOOLEAN DEFAULT 0,
           FOREIGN KEY (${remTFields.time_id}) REFERENCES times(id) ON DELETE CASCADE
           )`,
           [],
