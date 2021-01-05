@@ -2,7 +2,12 @@ import { addItemRem, addRemToTask, addTask } from '../testCases/add';
 import { editTaskNav, navigate, navToDay } from '../testCases/nav';
 import { updateTask } from '../testCases/update';
 import { remTask } from '../testCases/remove';
-import { containTxt, waitTextToBe } from '../testCases/testSteps/general';
+import {
+  containTxt,
+  waitElNotVis,
+  waitElVis,
+  waitTextToBe,
+} from '../testCases/testSteps/general';
 import { openApp } from '../testCases/general';
 import { checkNotif } from '../testCases/check';
 /* utils */
@@ -15,7 +20,7 @@ import { tItemIds } from '../../components/TaskItem/testIds';
 
 describe('Create rep', () => {
   // TODO: remove this after finishing all them test plans
-  // it('Random test Add itemz', () => openApp());
+  it('Random test Add itemz', () => openApp());
   //   it('Add in reminders into a future repeatable task time and see if its added into the past one as well', async function () {
   //     await addTask(actMenIds.calAct, taskData.title, '', false, false, '1');
   //     let date = new Date();
@@ -58,24 +63,104 @@ describe('Create rep', () => {
   //   await checkNotif(true);
   //   await remTask(actMenIds.todAct, taskData.title, true);
   // });
-  it('Add task with days repeatability', async function () {
-    await addTask(
-      actMenIds.calAct,
-      taskData.title,
-      '',
-      false,
-      false,
-      '1',
-      'days'
-    );
-
-    let date = new Date();
-    date = new Date(date.getFullYear(), date.getMonth(), date.getDate() + 1);
-
-    await navToDay(date.getFullYear(), date.getMonth(), date.getDate());
-
-    await waitTextToBe(tItemIds.titText, taskData.title, 3000);
-
-    await remTask(actMenIds.todAct, taskData.title, true);
-  });
+  // it('Add task with days repeatability', async function () {
+  //   await addTask(
+  //     actMenIds.calAct,
+  //     taskData.title,
+  //     '',
+  //     false,
+  //     false,
+  //     '1',
+  //     'days'
+  //   );
+  //   let date = new Date();
+  //   date = new Date(date.getFullYear(), date.getMonth(), date.getDate() + 1);
+  //   await navToDay(date.getFullYear(), date.getMonth(), date.getDate());
+  //   await waitElVis(`${tItemIds.mainBut}-${taskData.title}`, 3000);
+  //   await remTask(actMenIds.todAct, taskData.title, true);
+  // });
+  // it('Add task with weeks repeatability', async function () {
+  //   await addTask(
+  //     actMenIds.calAct,
+  //     taskData.title,
+  //     '',
+  //     false,
+  //     false,
+  //     '1',
+  //     'weeks'
+  //   );
+  //   let date = new Date();
+  //   date = new Date(date.getFullYear(), date.getMonth(), date.getDate() + 7);
+  //   let nextDay = new Date();
+  //   nextDay = new Date(
+  //     nextDay.getFullYear(),
+  //     nextDay.getMonth(),
+  //     nextDay.getDate() + 1
+  //   );
+  //   await navToDay(
+  //     nextDay.getFullYear(),
+  //     nextDay.getMonth(),
+  //     nextDay.getDate()
+  //   );
+  //   await waitElNotVis(`${tItemIds.mainBut}-${taskData.title}`, 3000);
+  //   await navToDay(date.getFullYear(), date.getMonth(), date.getDate());
+  //   await waitElVis(`${tItemIds.mainBut}-${taskData.title}`, 3000);
+  //   await remTask(actMenIds.todAct, taskData.title, true);
+  // });
+  // it('Add task with months repeatability', async function () {
+  //   await addTask(
+  //     actMenIds.calAct,
+  //     taskData.title,
+  //     '',
+  //     false,
+  //     false,
+  //     '1',
+  //     'months'
+  //   );
+  //   let date = new Date();
+  //   date = new Date(date.getFullYear(), date.getMonth() + 1, date.getDate());
+  //   let nextDay = new Date();
+  //   nextDay = new Date(
+  //     nextDay.getFullYear(),
+  //     nextDay.getMonth(),
+  //     nextDay.getDate() + 1
+  //   );
+  //   await navToDay(
+  //     nextDay.getFullYear(),
+  //     nextDay.getMonth(),
+  //     nextDay.getDate()
+  //   );
+  //   await waitElNotVis(`${tItemIds.mainBut}-${taskData.title}`, 3000);
+  //   await navToDay(date.getFullYear(), date.getMonth(), date.getDate());
+  //   await waitElVis(`${tItemIds.mainBut}-${taskData.title}`, 3000);
+  //   await remTask(actMenIds.todAct, taskData.title, true);
+  // });
+  // it('Add task with years repeatability', async function () {
+  //   await addTask(
+  //     actMenIds.calAct,
+  //     taskData.title,
+  //     '',
+  //     false,
+  //     false,
+  //     '1',
+  //     'years'
+  //   );
+  //   let date = new Date();
+  //   date = new Date(date.getFullYear() + 1, date.getMonth(), date.getDate());
+  //   let nextDay = new Date();
+  //   nextDay = new Date(
+  //     nextDay.getFullYear(),
+  //     nextDay.getMonth(),
+  //     nextDay.getDate() + 1
+  //   );
+  //   await navToDay(
+  //     nextDay.getFullYear(),
+  //     nextDay.getMonth(),
+  //     nextDay.getDate()
+  //   );
+  //   await waitElNotVis(`${tItemIds.mainBut}-${taskData.title}`, 3000);
+  //   await navToDay(date.getFullYear(), date.getMonth(), date.getDate());
+  //   await waitElVis(`${tItemIds.mainBut}-${taskData.title}`, 3000);
+  //   await remTask(actMenIds.todAct, taskData.title, true);
+  // });
 });

@@ -14,7 +14,7 @@ import { daySelIds } from '../../components/DaySelection/testIds';
 
 describe('Schedule Ring - Update rep reminder', () => {
   // TODO: remove this after finishing all them test plans
-  // it('Updt rep rem rng test', () => openApp());
+  it('Updt rep rem rng test', () => openApp());
   //   it('Updating a task time, for a ringed, once repeated on time reminder', async function () {
   //     // +2mins on time rem, repeating every 2mins
   //     const tTime = genFutTime(120000);
@@ -1487,11 +1487,9 @@ describe('Schedule Ring - Update rep reminder', () => {
   //   }
   //   await remTask(actMenIds.todAct, taskData.title, false, true, true);
   // });
-
   // it('Updating before reminders notif - rep rem', async function () {
   //   //  1 hour 2 mins
   //   const time = genFutTime(3720000);
-
   //   await addItemRem(
   //     actMenIds.calAct,
   //     taskData.title,
@@ -1508,29 +1506,21 @@ describe('Schedule Ring - Update rep reminder', () => {
   //     false,
   //     'hours'
   //   );
-
   //   await checkNotif();
   //   await dismissNotif();
-
   //   await navigate(actMenIds.todAct);
   //   await updateRem(taskData.title, 0, 2);
-
   //   await checkNotif();
   //   await dismissNotif();
-
   //   await checkNotif();
   //   await dismissNotif();
-
   //   await remTask(actMenIds.calAct, taskData.title, false, true, true);
   // });
-
   // it('Updating set time for before days reminder', async function () {
   //   let date = new Date();
   //   date = new Date(date.getFullYear(), date.getMonth(), date.getDate() + 1);
   //   await navToDay(date.getFullYear(), date.getMonth(), date.getDate());
-
   //   const time = genFutTime(120000);
-
   //   await addItemRem(
   //     false,
   //     taskData.title,
@@ -1547,15 +1537,11 @@ describe('Schedule Ring - Update rep reminder', () => {
   //     false,
   //     'days'
   //   );
-
   //   await checkNotif();
   //   await dismissNotif();
-
   //   await checkNotif();
   //   await dismissNotif();
-
   //   const newTime = genFutTime(240000);
-
   //   await navToDay(date.getFullYear(), date.getMonth(), date.getDate());
   //   await updateRem(
   //     taskData.title,
@@ -1569,82 +1555,67 @@ describe('Schedule Ring - Update rep reminder', () => {
   //     false,
   //     'days'
   //   );
-
   //   let timeToMatch = new Date();
   //   timeToMatch = new Date(timeToMatch.getTime() + 180000);
-
   //   await checkNotif();
   //   await dismissNotif();
-
   //   const currTime = new Date();
   //   if (currTime <= timeToMatch) {
   //     throw `reminder rung too early with currTime: ${currTime},
   //               time that should have been earlier: ${timeToMatch}`;
   //   }
-
   //   await navToDay(date.getFullYear(), date.getMonth(), date.getDate());
   //   await remTask(false, taskData.title, false, true, true);
   // });
-
-  it('Updating set time for before weeks reminder', async function () {
-    let date = new Date();
-    date = new Date(date.getFullYear(), date.getMonth(), date.getDate() + 7);
-    await navToDay(date.getFullYear(), date.getMonth(), date.getDate());
-
-    const time = genFutTime(120000);
-
-    await addItemRem(
-      false,
-      taskData.title,
-      '',
-      2,
-      true,
-      time.futHours,
-      time.futMins,
-      false,
-      false,
-      '1',
-      false,
-      '2',
-      false,
-      'weeks'
-    );
-
-    await checkNotif();
-    await dismissNotif();
-
-    await checkNotif();
-    await dismissNotif();
-
-    const newTime = genFutTime(240000);
-
-    await navToDay(date.getFullYear(), date.getMonth(), date.getDate());
-    await updateRem(
-      taskData.title,
-      0,
-      2,
-      true,
-      newTime.futHours,
-      newTime.futMins,
-      '1',
-      false,
-      false,
-      'weeks'
-    );
-
-    let timeToMatch = new Date();
-    timeToMatch = new Date(timeToMatch.getTime() + 180000);
-
-    await checkNotif();
-    await dismissNotif();
-
-    const currTime = new Date();
-    if (currTime <= timeToMatch) {
-      throw `reminder rung too early with currTime: ${currTime},
-                time that should have been earlier: ${timeToMatch}`;
-    }
-
-    await navToDay(date.getFullYear(), date.getMonth(), date.getDate());
-    await remTask(false, taskData.title, false, true, true);
-  });
+  // it('Updating set time for before weeks reminder', async function () {
+  //   let date = new Date();
+  //   date = new Date(date.getFullYear(), date.getMonth(), date.getDate() + 7);
+  //   await navToDay(date.getFullYear(), date.getMonth(), date.getDate());
+  //   const time = genFutTime(120000);
+  //   await addItemRem(
+  //     false,
+  //     taskData.title,
+  //     '',
+  //     2,
+  //     true,
+  //     time.futHours,
+  //     time.futMins,
+  //     false,
+  //     false,
+  //     '1',
+  //     false,
+  //     '2',
+  //     false,
+  //     'weeks'
+  //   );
+  //   await checkNotif();
+  //   await dismissNotif();
+  //   await checkNotif();
+  //   await dismissNotif();
+  //   const newTime = genFutTime(240000);
+  //   await navToDay(date.getFullYear(), date.getMonth(), date.getDate());
+  //   await updateRem(
+  //     taskData.title,
+  //     0,
+  //     2,
+  //     true,
+  //     newTime.futHours,
+  //     newTime.futMins,
+  //     '1',
+  //     false,
+  //     false,
+  //     'weeks'
+  //   );
+  //   let timeToMatch = new Date();
+  //   timeToMatch = new Date(timeToMatch.getTime() + 180000);
+  //   await checkNotif();
+  //   await dismissNotif();
+  //   const currTime = new Date();
+  //   if (currTime <= timeToMatch) {
+  //     throw `reminder rung too early with currTime: ${currTime},
+  //               time that should have been earlier: ${timeToMatch}`;
+  //   }
+  //   await navToDay(date.getFullYear(), date.getMonth(), date.getDate());
+  //   await remTask(false, taskData.title, false, true, true);
+  // });
 });

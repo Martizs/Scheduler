@@ -309,7 +309,7 @@ export async function scheduleRing() {
 
 export async function createRep(year, month, callBack) {
   return new Promise((resolve) => {
-    if (year && month) {
+    if (year && month + 1) {
       store.dispatch(toggleLoading(true));
 
       Database.createRep(year, month, () => {
