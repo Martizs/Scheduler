@@ -13,6 +13,8 @@ import {
   longPressIt,
   hasTxt,
   waitElNotVis,
+  scrollTo,
+  scrollToEnd,
 } from './testSteps/general';
 /* utils */
 import { getTitText } from './utils/general';
@@ -84,6 +86,8 @@ export async function remTask(navId, taskTitle, rep, viaOpts, lPress) {
 // assumes that the daytask list is visible already
 export async function remRem(taskTitle, updtInd, checkIndex = updtInd) {
   await editTaskNav(taskTitle);
+
+  await scrollToEnd(remPrevIds.remPrevScroll, 'right');
 
   await pressItem(remPrevIds.delRemBut(updtInd));
 

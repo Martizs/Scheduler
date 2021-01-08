@@ -19,6 +19,17 @@ export async function toBackground() {
   await device.sendToHome();
 }
 
+export async function scrollTo(elId, scrollId, direction) {
+  await waitFor(element(by.id(elId)))
+    .toBeVisible()
+    .whileElement(by.id(scrollId))
+    .scroll(50, direction);
+}
+
+export async function scrollToEnd(scrollId, direction) {
+  await element(by.id(scrollId)).scrollTo(direction);
+}
+
 // checks if element is visible
 export async function elVis(idStr) {
   await expect(element(by.id(idStr))).toBeVisible();

@@ -1,4 +1,4 @@
-import { containTxt, hasTxt, pressItem } from './testSteps/general';
+import { containTxt, hasTxt, pressItem, scrollTo } from './testSteps/general';
 import { editTaskNav, navigate } from './nav';
 import { remFill, taskFill } from './fill';
 /* consts */
@@ -25,6 +25,12 @@ export async function updateRem(
   if (taskTitle) {
     await editTaskNav(taskTitle);
   }
+
+  await scrollTo(
+    remPrevIds.mainRemBut(updtInd),
+    remPrevIds.remPrevScroll,
+    'right'
+  );
 
   // we open reminder to edit it
   await pressItem(remPrevIds.mainRemBut(updtInd));

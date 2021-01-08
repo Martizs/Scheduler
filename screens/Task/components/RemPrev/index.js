@@ -22,7 +22,7 @@ export const RemPrev = (props) => (
         <Text style={remPrev.remText}>Add reminder</Text>
       )}
     </TouchableOpacity>
-    <ScrollView horizontal>
+    <ScrollView horizontal testID={remPrevIds.remPrevScroll}>
       {props.reminders.map((rem, index) => (
         <TouchableOpacity
           testID={remPrevIds.mainRemBut(index)}
