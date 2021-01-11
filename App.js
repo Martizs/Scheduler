@@ -154,29 +154,31 @@ class App extends React.Component {
     }
   }
 
-  setInitSelDay(onlyRed) {
-    const date = new Date();
-    const day = date.getDate();
-    const month = date.getMonth();
-    const year = date.getFullYear();
+  setInitSelDay(gDays) {
+    if (gDays) {
+      const date = new Date();
+      const day = date.getDate();
+      const month = date.getMonth();
+      const year = date.getFullYear();
 
-    if (!onlyRed) {
       genDays({ day, month, year }, false, this.props.dispatch);
       this.setState({
         initMonth: month,
         initYear: year,
       });
     }
-
-    this.props.dispatch(setSelSpecDay(day));
-    this.props.dispatch(setSelMonth(month));
-    this.props.dispatch(setSelYear(year));
   }
 
   _handleAppStateChange(nextAppState) {
     if (nextAppState === 'active') {
+      // TODO: check if this does not fuk up
+      // when you've removed the initial screen function
+      // and set up the default homescreen
+      // try changing app states when the following months
+      // day has been selected and see if nothign fuks up in
+      // task preview and calendar comp
       this.props.dispatch(initScreen());
-      this.setInitSelDay();
+      this.setInitSelDay(true);
     }
   }
 
@@ -188,8 +190,8 @@ class App extends React.Component {
     this.setState({
       showMenu: false,
     });
+    this.setInitSelDay(title === DAY || title === MONTH);
     this.props.dispatch(remBackAction('closeMenu'));
-    this.setInitSelDay(true);
     this.props.dispatch(switchScreen(title));
   };
 

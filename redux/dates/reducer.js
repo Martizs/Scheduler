@@ -1,3 +1,5 @@
+/* utils */
+import { genCalDays } from '../../utils/dateUtils';
 /* actions */
 import * as actions from './actions';
 
@@ -8,6 +10,11 @@ const selDay = (state = selDayState, action) => {
   switch (action.type) {
     case actions.SET_SEL_DAY:
       return action.selDay;
+    case actions.SET_INIT_SEL_DAY: {
+      const date = new Date();
+      const gen = genCalDays(date.getMonth(), date.getFullYear());
+      return gen.initDay;
+    }
     case actions.SET_SEL_SPEC_DAY:
       return {
         ...state,
@@ -46,6 +53,18 @@ const calDays = (state = calDaysInit, action) => {
       change: Math.random().toString(36).substr(2, 22),
       mainMonth: action.items.mainMonth,
       mainYear: action.items.mainYear,
+    };
+  } else if (action.type === actions.SET_INIT_CAL_DAYS) {
+    const date = new Date();
+    const gen = genCalDays(date.getMonth(), date.getFullYear());
+    return {
+      data: gen.items,
+      // so we use this to check for changes in generated calendar days
+      // we use a randomly generated string instead of checking actual
+      // changes in array for performance obviously
+      change: Math.random().toString(36).substr(2, 22),
+      mainMonth: date.getMonth(),
+      mainYear: date.getFullYear(),
     };
   }
   return state;

@@ -286,7 +286,7 @@ export function test(params) {
   db.transaction((txn) => {
     // NOTE: so there needs to be as many question marks as there are values you inserting
     txn.executeSql(
-      `SELECT * FROM ${remTable}`,
+      `SELECT * FROM ${tasksTable}`,
       [],
       (tx0, res0) => {
         console.log('results.rows.length', res0.rows.length);

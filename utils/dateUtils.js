@@ -30,7 +30,9 @@ export function formNamedDate(year, month, day) {
         addZero(year),
         addZero(month + 1),
         addZero(day),
-        (dateStr) => resolve(dateStr),
+        (dateStr) => {
+          resolve(dateStr);
+        },
         (err) => {
           reject(`Date naming error ${err}`);
         }

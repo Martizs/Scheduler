@@ -10,6 +10,7 @@ import {
   bulkUpdate,
   bulkInsert,
   dispatchDbCall,
+  bulkUpdateProm,
 } from './helpers';
 import { addZero } from '../utils/dateUtils';
 /* consts */
@@ -320,7 +321,30 @@ export async function updateItem(
         `INSERT INTO ${tasksTable} (${taskTFields.title}, ${taskTFields.desc}, ${taskTFields.hours}, ${taskTFields.minutes}, ${taskTFields.afterLinks}) VALUES (?,?,?,?,?)`,
         [title, desc, hours, minutes, newAfterLinks]
       )
-        .then((res1) => {
+        .then(async (res1) => {
+          // here we also want to find and update after links of previously repeatable task
+          // linked tasks, to also include this newly created single task
+          const linkedTaskQ = await exeSqlPromise(
+            `SELECT ${taskTFields.afterLinks}, id FROM ${tasksTable} WHERE ${taskTFields.afterLinks} LIKE '%${task_id},%' OR ${taskTFields.afterLinks} LIKE '%${task_id}]'`
+          );
+
+          if (linkedTaskQ.rows && linkedTaskQ.rows.length) {
+            const linkedTaskData = [];
+            const updtIds = [];
+            for (let i = 0; i < linkedTaskQ.rows.length; i++) {
+              const linkedTask = linkedTaskQ.rows.item(i);
+
+              const newLinks = JSON.parse(linkedTask.afterLinks);
+              newLinks.push(res1.insertId);
+
+              linkedTaskData.push({ afterLinks: JSON.stringify(newLinks) });
+
+              updtIds.push([linkedTask.id + '']);
+            }
+
+            await bulkUpdateProm('id=?', updtIds, tasksTable, linkedTaskData);
+          }
+
           // then we update the given time of the task
           // with the new tasks id
           // BOOM, super easy

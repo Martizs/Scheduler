@@ -69,7 +69,7 @@ class LinkingModal extends React.Component {
     return (
       <View style={linkModCont}>
         <Text style={textContainer.style}>
-          Select tasks that should always be after{' '}
+          Select tasks that should always be before{' '}
           <Text style={linkMod.titleText}>{linkItem.title}</Text> task
         </Text>
         <FlatList

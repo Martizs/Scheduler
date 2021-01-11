@@ -1,4 +1,4 @@
-package com.schedulerbypk2;
+package com.schedulerbypk2.debug;
 
 // bridge imports
 import com.facebook.react.bridge.ReactApplicationContext;

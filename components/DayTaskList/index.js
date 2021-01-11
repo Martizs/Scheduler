@@ -16,6 +16,8 @@ import {
   setSelSpecDay,
   setSelMonth,
   setSelYear,
+  setInitSelDay,
+  setInitCalDays,
 } from '../../redux/dates/actions';
 /* consts */
 import {
@@ -57,6 +59,8 @@ import { dispatchDbCall } from '../../database/helpers';
 class DayTaskList extends React.Component {
   constructor(props) {
     super();
+
+    this.mounted = true;
 
     this.state = {
       dropDown: false,
@@ -138,28 +142,9 @@ class DayTaskList extends React.Component {
       this.props.screenKey !== prevProps.screenKey ||
       !isEqual(this.props.selDay, prevProps.selDay)
     ) {
-      // TODO: remove this, if its unnecesary, currently we leave it
-      // for testing purposes
-      if (
-        this.props.selDay?.month !== prevProps.selDay?.month ||
-        this.props.selDay?.year !== prevProps.selDay?.year
-      ) {
-        dispatchDbCall(() =>
-          createRep(year, month, () =>
-            dispatchDbCall(() =>
-              getTimeTasks(
-                true,
-                { year, month: month + 1, day },
-                this.setDayTasks
-              )
-            )
-          )
-        );
-      } else {
-        dispatchDbCall(() =>
-          getTimeTasks(true, { year, month: month + 1, day }, this.setDayTasks)
-        );
-      }
+      dispatchDbCall(() =>
+        getTimeTasks(true, { year, month: month + 1, day }, this.setDayTasks)
+      );
     }
 
     if (this.props.defSort !== prevProps.defSort) {
@@ -170,6 +155,7 @@ class DayTaskList extends React.Component {
   componentWillUnmount() {
     this.props.dispatch(remBackAction('sortMenu'));
     this.props.dispatch(remBackAction('menu'));
+    this.mounted = false;
   }
 
   taskLoad() {
@@ -211,7 +197,9 @@ class DayTaskList extends React.Component {
       );
     }
 
-    this.setState(stateObject);
+    if (this.mounted) {
+      this.setState(stateObject);
+    }
   }
 
   scrollToIndex(index) {
@@ -766,6 +754,7 @@ const mapStateToProps = (state) => ({
   screenOrient: state.screenOrient,
   screenKey: state.currScreen.screenKey,
   defSort: state.settings.defSort,
+  actMen: state.currScreen.actMen,
 });
 
 const mapDispatchToProps = (dispatch) => ({

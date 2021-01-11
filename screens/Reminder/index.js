@@ -55,6 +55,7 @@ import {
 /* utils */
 import isEqual from 'lodash/isEqual';
 import { repTypeHours } from './../../consts/dateConts';
+import { environment } from '../../env';
 
 class Reminder extends React.Component {
   constructor(props) {
@@ -588,27 +589,29 @@ class Reminder extends React.Component {
                 />
               </View>
             </View>
-            <View style={rem.section}>
-              <TouchableOpacity
-                onPress={() =>
-                  this.setState((prevState) => {
-                    return {
-                      testCheck: !prevState.testCheck,
-                    };
-                  })
-                }
-                testID={remIds.testCheck}
-              >
-                <CheckBox
-                  value={this.state.testCheck}
-                  disabled
-                  tintColors={{
-                    true: darkBasic.textColor,
-                    false: darkBasic.textColor,
-                  }}
-                />
-              </TouchableOpacity>
-            </View>
+            {environment === 'development' && (
+              <View style={rem.section}>
+                <TouchableOpacity
+                  onPress={() =>
+                    this.setState((prevState) => {
+                      return {
+                        testCheck: !prevState.testCheck,
+                      };
+                    })
+                  }
+                  testID={remIds.testCheck}
+                >
+                  <CheckBox
+                    value={this.state.testCheck}
+                    disabled
+                    tintColors={{
+                      true: darkBasic.textColor,
+                      false: darkBasic.textColor,
+                    }}
+                  />
+                </TouchableOpacity>
+              </View>
+            )}
             <View style={rem.repRemCont}>
               <RepeatComp
                 rem

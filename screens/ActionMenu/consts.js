@@ -5,6 +5,7 @@ import {
   screenTitles,
   TEST_TITLE,
 } from '../../consts/generalConsts';
+import { environment } from '../../env';
 import { actMenIds } from './testIds';
 
 export const menuItems = [
@@ -26,10 +27,13 @@ export const menuItems = [
     icon: 'assignment',
     testId: actMenIds.todAct,
   },
-  {
+];
+
+if (environment === 'development') {
+  menuItems.push({
     key: TEST_TITLE,
     title: screenTitles[TEST_TITLE],
     icon: 'assignment',
     testId: actMenIds.testAct,
-  },
-];
+  });
+}

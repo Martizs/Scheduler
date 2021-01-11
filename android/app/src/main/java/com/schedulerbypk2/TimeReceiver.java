@@ -1,4 +1,4 @@
-package com.schedulerbypk2;
+package com.schedulerbypk2.debug;
 
 /* React native */
 import com.facebook.react.modules.core.DeviceEventManagerModule;
@@ -96,9 +96,18 @@ public class TimeReceiver extends BroadcastReceiver {
 
                     mainTimIds.pushInt(mainTimeId);
 
+
+
+                    // and before we notify the user
                     // we cancel previous pendings just to have everything clean
                     // nothing will be canceled if the pendings have been already done
                     Utils.cancelPendings(context, mainTimeId);
+                    // Also we remove the current notification, this is mainly used
+                    // for the full screen intent to work when the reminder repeats itself
+                    // cause it doesn't trigger if there's a notification already in the
+                    // notification background stack
+                    NotificationManagerCompat notificationManagerCanc = NotificationManagerCompat.from(context);
+                    notificationManagerCanc.cancel(mainTimeId);
 
                     // alarm action set up
                     Intent alarmIntent = context.getPackageManager().getLaunchIntentForPackage(packageName);

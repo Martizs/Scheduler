@@ -5,6 +5,11 @@ export function setSelDay(selDay) {
   return { type: SET_SEL_DAY, selDay };
 }
 
+export const SET_INIT_SEL_DAY = 'SET_INIT_SEL_DAY';
+export function setInitSelDay() {
+  return { type: SET_INIT_SEL_DAY };
+}
+
 export const SET_SEL_SPEC_DAY = 'SET_SEL_SPEC_DAY';
 export function setSelSpecDay(specDay) {
   return { type: SET_SEL_SPEC_DAY, specDay };
@@ -24,4 +29,9 @@ export function setSelYear(selYear) {
 export const SET_CAL_DAYS = 'SET_CAL_DAYS';
 export function setCalDays(calDays, mainMonth, mainYear) {
   return { type: SET_CAL_DAYS, items: { calDays, mainMonth, mainYear } };
+}
+
+export const SET_INIT_CAL_DAYS = 'SET_INIT_CAL_DAYS';
+export function setInitCalDays() {
+  return { type: SET_INIT_CAL_DAYS };
 }

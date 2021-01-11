@@ -16,10 +16,10 @@ import { setSelMonth, setSelYear } from '../../../../redux/dates/actions';
 
 const CalHeader = (props) => {
   const changeMonth = (incr) => {
-    const { selDay } = props;
+    const { mainMonth, mainYear } = props;
 
-    const date = new Date(selDay.year, selDay.month);
-    date.setMonth(selDay.month + incr);
+    const date = new Date(mainYear, mainMonth);
+    date.setMonth(mainMonth + incr);
     const month = date.getMonth();
     const year = date.getFullYear();
     genDays({ month, year }, false, props.dispatch);
@@ -76,7 +76,6 @@ const CalHeader = (props) => {
 };
 
 const mapStateToProps = (state) => ({
-  selDay: state.selDay,
   calDays: state.calDays.data,
   mainMonth: state.calDays.mainMonth,
   mainYear: state.calDays.mainYear,

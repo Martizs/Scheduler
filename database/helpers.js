@@ -249,6 +249,20 @@ export async function bulkUpdate(
   }
 }
 
+// promise wrapper function around the bulk update
+export function bulkUpdateProm(whereClause, whereVals, tableName, data) {
+  return new Promise((resolve, reject) => {
+    bulkUpdate(
+      whereClause,
+      whereVals,
+      tableName,
+      data,
+      (resp) => resolve(resp),
+      (err) => reject(err)
+    );
+  });
+}
+
 // @fields - will have to be an array of objects with keys: 'name', 'valueKey' or 'value'
 // where 'name' - is the fields to be updated name as it is called in the db (STRING)
 // 'valueKey' - the key of the update value in the data array (STRING)

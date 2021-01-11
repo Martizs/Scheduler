@@ -4,7 +4,10 @@ export const SWITCH_SCREEN = 'SWITCH_SCREEN';
 // when backing title should be null
 // #bestPractice
 export function switchScreen(key, back, title, extraInfo) {
-  return { type: SWITCH_SCREEN, items: { key, back, title, extraInfo } };
+  return {
+    type: SWITCH_SCREEN,
+    items: { key, back, title, extraInfo },
+  };
 }
 
 export const ADD_EXTRA_INFO = 'ADD_EXTRA_INFO';
