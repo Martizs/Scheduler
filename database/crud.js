@@ -119,7 +119,7 @@ export async function remCrud(
             if (
               crud === 1 &&
               !arrToValidate.some(
-                (val) => reminder.updateFields.indexOf(val) !== -1
+                (val) => reminder.updateFields?.indexOf(val) !== -1
               )
             ) {
               remDataz.push({
@@ -270,6 +270,210 @@ export async function remCrud(
         });
       }
     }
+  });
+}
+
+export async function updateItemDate(moveItem, year, month, day, callBack) {
+  console.log('moveItem', moveItem);
+  console.log('year', year);
+  console.log('month', month + 1);
+  console.log('day', day);
+
+  return new Promise((resolve) => {
+    const monStr = addZero(month + 1);
+    const dayStr = addZero(day);
+
+    const strAfterLinks =
+      moveItem.afterLinks && JSON.stringify(moveItem.afterLinks);
+
+    const repParsed =
+      moveItem.repeatability && JSON.parse(moveItem.repeatability);
+
+    // so first we check if its the same day that the user wants to move the
+    // task to, meaning if it exists for the given year month day, the task time
+    // is being moved to where it already is
+    exeSqlPromise(
+      `SELECT * FROM ${timesTable} WHERE id=? AND year=? AND month=? AND day=?`,
+      [moveItem.id, year, monStr, dayStr]
+    )
+      .then((res0) => {
+        if (!res0.rows.length) {
+          if (repParsed?.type && (repParsed?.number || repParsed?.values)) {
+            // so if its a repeatable task we'll be turning it into a single task and moving it.
+            exeSqlPromise(
+              `INSERT INTO ${tasksTable} (${taskTFields.title}, ${taskTFields.desc}, ${taskTFields.hours},
+                 ${taskTFields.minutes}, ${taskTFields.afterLinks}) VALUES (?,?,?,?,?)`,
+              [
+                moveItem.title,
+                moveItem.description,
+                moveItem.hours,
+                moveItem.minutes,
+                strAfterLinks,
+              ]
+            )
+              .then(async (res1) => {
+                // here we also want to find and update after links of previously repeatable task
+                // linked tasks, to also include this newly created single task
+                const linkedTaskQ = await exeSqlPromise(
+                  `SELECT ${taskTFields.afterLinks}, id FROM ${tasksTable} WHERE ${taskTFields.afterLinks}
+                   LIKE '%${moveItem.task_id},%' OR ${taskTFields.afterLinks} LIKE '%${moveItem.task_id}]'`
+                );
+
+                if (linkedTaskQ.rows && linkedTaskQ.rows.length) {
+                  const linkedTaskData = [];
+                  const updtIds = [];
+                  for (let i = 0; i < linkedTaskQ.rows.length; i++) {
+                    const linkedTask = linkedTaskQ.rows.item(i);
+
+                    const newLinks = JSON.parse(linkedTask.afterLinks);
+                    newLinks.push(res1.insertId);
+
+                    linkedTaskData.push({
+                      afterLinks: JSON.stringify(newLinks),
+                    });
+
+                    updtIds.push([linkedTask.id + '']);
+                  }
+
+                  await bulkUpdateProm(
+                    'id=?',
+                    updtIds,
+                    tasksTable,
+                    linkedTaskData
+                  );
+                }
+
+                exeSqlPromise(
+                  `UPDATE ${timesTable} SET ${timesTFields.task_id}=?, year=?, month=?, day=? WHERE id=?`,
+                  [res1.insertId, year, monStr, dayStr, moveItem.id]
+                )
+                  .then(() => {
+                    if (moveItem.reminders.length) {
+                      // add
+                      remCrud(
+                        1,
+                        moveItem.reminders,
+                        [
+                          {
+                            ...moveItem,
+                            year,
+                            month: monStr,
+                            day: dayStr,
+                          },
+                        ],
+                        moveItem.hours,
+                        moveItem.minutes,
+                        moveItem.id
+                      )
+                        .then(() => {
+                          callBack();
+                          dispatchDbCall(scheduleRing);
+                          resolve();
+                        })
+                        .catch((err) => {
+                          callBack();
+                          dispatchDbCall(scheduleRing);
+                          console.log(
+                            'Error updating reminders for updateItemDate: ',
+                            err
+                          );
+                          resolve();
+                        });
+                    } else {
+                      callBack();
+                      resolve();
+                    }
+                  })
+                  .catch((err) => {
+                    callBack();
+                    resolve();
+                    console.log(
+                      'error inserting new task for updateItemDate',
+                      err,
+                      'moved time id',
+                      moveItem.key
+                    );
+                  });
+              })
+              .catch((err) => {
+                callBack();
+                resolve();
+                console.log(
+                  'error inserting new task for repeatable moved task',
+                  err,
+                  'moved time id',
+                  moveItem.key
+                );
+              });
+          } else {
+            // we just update the time id
+            exeSqlPromise(
+              `UPDATE ${timesTable} SET year=?, month=?, day=? WHERE id=?`,
+              [year, monStr, dayStr, moveItem.id]
+            )
+              .then(() => {
+                if (moveItem.reminders.length) {
+                  // add
+                  remCrud(
+                    1,
+                    moveItem.reminders,
+                    [
+                      {
+                        ...moveItem,
+                        year,
+                        month: monStr,
+                        day: dayStr,
+                      },
+                    ],
+                    moveItem.hours,
+                    moveItem.minutes,
+                    moveItem.id
+                  )
+                    .then(() => {
+                      callBack();
+                      dispatchDbCall(scheduleRing);
+                      resolve();
+                    })
+                    .catch((err) => {
+                      callBack();
+                      dispatchDbCall(scheduleRing);
+                      console.log(
+                        'Error updating reminders for updateItemDate: ',
+                        err
+                      );
+                      resolve();
+                    });
+                } else {
+                  callBack();
+                  resolve();
+                }
+              })
+              .catch((err) => {
+                callBack();
+                resolve();
+                console.log(
+                  'error updating time task for updateItemDate',
+                  err,
+                  'moved time id',
+                  moveItem.key
+                );
+              });
+          }
+        } else {
+          callBack();
+          resolve();
+        }
+      })
+      .catch((err) => {
+        callBack();
+        resolve();
+        console.log(
+          'error checking if time id already exists in day',
+          err,
+          'time_id',
+          moveItem.id
+        );
+      });
   });
 }
 
@@ -546,8 +750,8 @@ export async function addItem(
     if (repeatability) {
       store.dispatch(toggleLoading(true));
       // so we'll add Repeatable times
-      // so repeatability - will be an object containing 'type' & 'number'
-      // example - type: month, number: 2 == every two months
+      // so repeatability - will be an object containing 'type' & ('number' || 'values')
+      // example - type: month, number: 2 == every two months, values: ['Mo', 'Tu']
 
       const dateName = `${year}-${monStr}-${dayStr}`;
 
@@ -562,7 +766,7 @@ export async function addItem(
 
       const endDate = moment.utc(dateString);
 
-      // so we'll be creating tasks for up to one year
+      // so we'll be creating tasks for up 5 months
       endDate.add(5, repTypeMonth);
       // and we'll create tasks for the whole last month
       // so we set the and date to be for the last day of the month
@@ -574,7 +778,8 @@ export async function addItem(
       const repEndTime = datesData.repEndTime;
 
       exeSqlPromise(
-        `INSERT INTO ${tasksTable} (${taskTFields.title}, ${taskTFields.desc}, ${taskTFields.repeatability}, ${taskTFields.rep_end_time}, ${taskTFields.hours}, ${taskTFields.minutes}) VALUES (?,?,?,?,?,?)`,
+        `INSERT INTO ${tasksTable} (${taskTFields.title}, ${taskTFields.desc}, ${taskTFields.repeatability}, 
+          ${taskTFields.rep_end_time}, ${taskTFields.hours}, ${taskTFields.minutes}) VALUES (?,?,?,?,?,?)`,
         [
           title,
           desc,
@@ -587,10 +792,19 @@ export async function addItem(
         .then((res) => {
           const adjDates = [];
 
+          const currDate = moment.utc();
+          currDate.set({ hour: 0, minute: 0, second: 0, millisecond: 0 });
+
           dates.forEach((date) => {
+            const dateMom = moment.utc(
+              `${date.year}-${date.month}-${date.day}T00:00:00Z`
+            );
+
             adjDates.push({
-              ...date,
-              done: 0,
+              year: date.year,
+              month: date.month,
+              day: date.day,
+              done: date.canDone && dateMom.isBefore(currDate) ? 1 : 0,
               task_id: res.insertId,
             });
           });
@@ -611,7 +825,7 @@ export async function addItem(
                   timesData.push({
                     ...dateItem,
                     id: timeId,
-                    done: false,
+                    done: adjDates[index].done,
                   });
                 });
 

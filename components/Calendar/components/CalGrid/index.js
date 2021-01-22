@@ -44,7 +44,7 @@ const CalGrid = (props) => {
     };
 
     const pressSelDay = (dayItem) => {
-      if (daysEqual(dayItem)) {
+      if (!props.move && daysEqual(dayItem)) {
         props.dispatch(switchScreen(DAY));
       } else {
         // selDay items here are also numbers

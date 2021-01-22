@@ -47,6 +47,7 @@ export const Calendar = (props) => {
         setInputXY={props.setInputXY}
       />
       <CalGrid
+        move={props.move}
         portrait={props.portrait}
         calHeight={calHeight}
         headHeight={headHeight}

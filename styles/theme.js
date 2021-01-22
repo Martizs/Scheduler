@@ -9,7 +9,7 @@ const darkGreyBorder = '#4F4F4F';
 const opaqueGrey = 'rgba(79,79,79, 0.6)';
 export const opaqueDark = 'rgba(0, 0, 0, 0.6)';
 
-export const calTodayHighLight = '#FFD184';
+export const highLight = '#FFD184';
 export const calSelHighLight = '#fff';
 export const buttTypes = {
   error: '#ff6961',
@@ -54,21 +54,29 @@ const ltBlueGradColors = [
 export const titleFontSize = RFValue(30);
 export const subTitFontSize = RFValue(25);
 export const simpleTextFS = RFValue(20);
+export const simpleTextContDim = 2 * simpleTextFS;
 export const smallTextFS = RFValue(15);
+export const smallTextContDim = 2 * smallTextFS;
 export const ultraSmTextFS = RFValue(12);
 export const LIconSize = RFValue(45);
 export const iconSize = RFValue(40);
 export const interIconSize = RFValue(35);
 export const smallIconSize = RFValue(30);
 export const sSmallIconSize = RFValue(24);
+export const ultraSmallIconSize = RFValue(16);
 /* paddings */
 export const titlePadding = 8;
 export const listItemPadding = 15; // padding for top and bottom
 export const listItemPadDD = 5;
+export const taskItemPad = 5;
 export const txtInputPad = 2;
 /* heights */
 // titleDivHeight - currently not used anywhere
 export const titleDivHeight = 15;
+// NOTE: we do not set this height, the checkbox we use
+// has a hardcoded height to it and the height
+// is this
+export const checkBoxHeight = 32;
 /* borders */
 export const titleBorderWidth = 5;
 export const simpleBorderWidth = 1;
@@ -79,6 +87,8 @@ export const darkBasic = {
   invTextColor: lightThTextColor,
   textColor: darkThTextColor,
   placeHolderColor: 'rgba(255, 255, 255, 0.6)',
+  highLightHolderCol: 'rgba(255, 209, 132, 0.6)',
+  highLight,
   gradColors: ltBlueGradColors,
   listItemBorderColor: darkGreyBorder,
   strongDivColor: darkThTextColor,

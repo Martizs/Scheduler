@@ -18,10 +18,11 @@ import { alarm } from './style';
 import { MainTask } from './components/MainTask';
 /* schedule */
 import {
-  openApp,
+  showInApp,
   stopMedia,
   isMediaPlaying,
   cancelPendings,
+  cancelNotif,
 } from '../../schedule';
 /* consts */
 import { backgroundImage } from '../../consts/generalConsts';
@@ -29,10 +30,14 @@ import { alarmIds } from './testIds';
 /* database */
 import { getTimeTasks } from '../../database/retrievers';
 import { dispatchDbCall } from '../../database/helpers';
-import { dontRepRem } from '../../database/crud';
+import { doneTask, dontRepRem } from '../../database/crud';
 /* redux */
 import { connect } from 'react-redux';
-import { setAppRngCode } from '../../redux/general/actions';
+import {
+  setAppRngCode,
+  setInitDate,
+  setInitItemId,
+} from '../../redux/general/actions';
 
 class Alarm extends React.Component {
   constructor(props) {
@@ -47,6 +52,7 @@ class Alarm extends React.Component {
     this.stopRinging = this.stopRinging.bind(this);
     this.onAlarmBackground = this.onAlarmBackground.bind(this);
     this.alarmAction = this.alarmAction.bind(this);
+    this.markAsDone = this.markAsDone.bind(this);
   }
 
   componentDidMount() {
@@ -129,7 +135,18 @@ class Alarm extends React.Component {
     }
 
     if (opApp) {
-      openApp();
+      const { year, month, day } = this.state.timeTask;
+      this.props.dispatch(setInitItemId(this.props.mainTimeId));
+      // -1 cause in the db its saved as the normal number 1-12
+      // but retarded date functions accept month count 0-11
+      this.props.dispatch(
+        setInitDate({
+          year: parseInt(year, 10),
+          month: parseInt(month, 10) - 1,
+          day: parseInt(day, 10),
+        })
+      );
+      showInApp();
     } else {
       this.props.dispatch(setAppRngCode(this.props.rngCode));
       BackHandler.exitApp();
@@ -142,6 +159,7 @@ class Alarm extends React.Component {
         dontRepRem(
           this.props.mainTimeId,
           () => {
+            cancelNotif(this.props.mainTimeId);
             this.alarmAction(opApp);
           },
           (err) => {
@@ -157,8 +175,23 @@ class Alarm extends React.Component {
         )
       );
     } else {
+      cancelNotif(this.props.mainTimeId);
       this.alarmAction(opApp);
     }
+  }
+
+  markAsDone() {
+    dispatchDbCall(() =>
+      doneTask(
+        this.props.mainTimeId,
+        true,
+        () => {
+          cancelNotif(this.props.mainTimeId);
+          this.alarmAction();
+        },
+        (err) => console.log('Alarm mark as done error: ', err)
+      )
+    );
   }
 
   stopRinging() {
@@ -220,7 +253,7 @@ class Alarm extends React.Component {
                 onPress={() => this.onDontRemSave(true)}
               >
                 <Text testID={alarmIds.toAppTxt} style={textContainer.style}>
-                  Go to app
+                  Show in app
                 </Text>
               </TouchableOpacity>
               {this.state.ringing && (
@@ -238,6 +271,16 @@ class Alarm extends React.Component {
                   </View>
                 </TouchableOpacity>
               )}
+              <TouchableOpacity
+                testID={alarmIds.markDone}
+                style={{
+                  ...alarm.button,
+                  borderColor: darkBasic.buttTypes.error,
+                }}
+                onPress={() => this.markAsDone()}
+              >
+                <Text style={textContainer.style}>Mark as done</Text>
+              </TouchableOpacity>
             </View>
           </View>
         </View>

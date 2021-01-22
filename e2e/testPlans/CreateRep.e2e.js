@@ -10,7 +10,7 @@ import { addZeroT, genFutTime } from '../testCases/utils/general';
 import { actMenIds } from '../../screens/ActionMenu/testIds';
 import { taskData } from '../testCases/consts/task';
 import { tItemIds } from '../../components/TaskItem/testIds';
-import { remPrevIds } from '../../screens/Task/components/RemPrev/testIds';
+import { remPrevIds } from '../../components/RemPrev/testIds';
 import { daySelIds } from '../../components/DaySelection/testIds';
 
 describe('Create rep', () => {

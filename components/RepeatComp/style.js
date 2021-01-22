@@ -1,18 +1,13 @@
-import {StyleSheet} from 'react-native';
-import {RFValue} from 'react-native-responsive-fontsize';
+import { StyleSheet } from 'react-native';
+import { RFValue } from 'react-native-responsive-fontsize';
 /* styles */
-import {smallTextCont} from '../../styles/generalStyles';
-import {darkBasic, simpleBorderWidth} from '../../styles/theme';
+import { smallTextCont } from '../../styles/generalStyles';
+import { darkBasic, simpleBorderWidth } from '../../styles/theme';
 
 export const repComp = StyleSheet.create({
   container: {
     display: 'flex',
     flexDirection: 'row',
-  },
-  label: {
-    ...smallTextCont.style,
-    marginTop: 'auto',
-    marginBottom: 'auto',
   },
   repContainer: {
     display: 'flex',
@@ -49,5 +44,12 @@ export const repComp = StyleSheet.create({
     ...smallTextCont.style,
     marginTop: 'auto',
     marginBottom: 'auto',
+  },
+  repOptsCont: {
+    display: 'flex',
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+    paddingBottom: 5,
+    paddingTop: 8,
   },
 });

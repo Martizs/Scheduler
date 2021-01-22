@@ -81,7 +81,7 @@ public class Database extends ReactContextBaseJavaModule {
         try {
             String schedResp = dbAdapter.scheduleRing();
 
-            if(schedResp.indexOf("error") != -1){
+            if(schedResp.contains("error")){
                 Utils.onError(reactContext, 1, 1, schedResp);
             }
 
@@ -97,7 +97,7 @@ public class Database extends ReactContextBaseJavaModule {
         try {
             String repResp = dbAdapter.createRep(year, month);
 
-            if(repResp.indexOf("error") != -1){
+            if(repResp.contains("error")){
                 Utils.onError(reactContext, 1, 1, repResp);
             }
 
@@ -109,9 +109,9 @@ public class Database extends ReactContextBaseJavaModule {
     }
 
     @ReactMethod
-    public void formatNamedDate(String year, String month, String day, Callback successCallback, Callback errorCallback) {
+    public void formatNamedDate(String year, String month, String day, boolean alterName, Callback successCallback, Callback errorCallback) {
         try {
-            successCallback.invoke(Utils.formatNamedDate(year, month, day));
+            successCallback.invoke(Utils.formatNamedDate(year, month, day, false, alterName));
         } catch(Exception e) {
             errorCallback.invoke("Error naming date" + e.getMessage());
         }
@@ -122,7 +122,7 @@ public class Database extends ReactContextBaseJavaModule {
         try {
             String resp = dbAdapter.dontRepRem(timeId);
 
-            if(resp.indexOf("error") != -1) {
+            if(resp.contains("error")) {
                 errorCallback.invoke("dontRepRem db update error: " + resp);
             } else {
                 successCallback.invoke("Reminders updated");

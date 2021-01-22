@@ -18,7 +18,6 @@
       
 
       <meta-data android:name="com.schedulerbypk2.ic_launcher_round" android:resource="@mipmap/ic_launcher_round" />
-      <meta-data android:name="com.schedulerbypk2.notification" android:resource="@layout/notification" />
 
       <activity
         android:name=".MainActivity"

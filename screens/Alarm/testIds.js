@@ -4,4 +4,5 @@ export const alarmIds = {
   toApp: 'toApp',
   toAppTxt: 'toAppTxt',
   stop: 'stop',
+  markDone: 'markDone',
 };

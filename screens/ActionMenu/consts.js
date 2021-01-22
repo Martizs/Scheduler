@@ -10,12 +10,6 @@ import { actMenIds } from './testIds';
 
 export const menuItems = [
   {
-    key: HOME_TITLE,
-    title: screenTitles[HOME_TITLE],
-    icon: 'home',
-    testId: actMenIds.homAct,
-  },
-  {
     key: MONTH,
     title: screenTitles[MONTH],
     icon: 'today',

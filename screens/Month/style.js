@@ -1,6 +1,6 @@
-import {StyleSheet} from 'react-native';
+import { StyleSheet } from 'react-native';
 /* styles */
-import {screenContainer} from '../../styles/generalStyles';
+import { screenContainer } from '../../styles/generalStyles';
 
 export const month = StyleSheet.create({
   container: {
@@ -14,18 +14,24 @@ export const month = StyleSheet.create({
     justifyContent: 'center',
     flex: 2,
   },
+  movBut: { marginTop: 'auto', marginBottom: 'auto' },
   but: {
     marginTop: 'auto',
   },
   calContainer: {
     paddingRight: '5%',
     paddingLeft: '5%',
-    flex: 30,
+    flex: 25,
+  },
+  movCont: {
+    display: 'flex',
+    flexDirection: 'row',
+    flex: 5,
   },
   prevContainer: {
     paddingLeft: 8,
     paddingRight: 8,
-    flex: 20,
+    flex: 25,
   },
   prevTaskCont: {},
 });
@@ -47,13 +53,18 @@ export const horMonth = StyleSheet.create({
     marginTop: 'auto',
   },
   calContainer: {
-    flex: 30,
+    flex: 25,
+    display: 'flex',
+  },
+  movCont: {
+    display: 'flex',
+    flexDirection: 'row',
   },
   prevContainer: {
     display: 'flex',
     justifyContent: 'space-evenly',
   },
   prevTaskCont: {
-    flex: 18,
+    flex: 25,
   },
 });

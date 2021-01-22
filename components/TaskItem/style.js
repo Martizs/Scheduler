@@ -1,16 +1,16 @@
 import { StyleSheet } from 'react-native';
 /* styles */
-import { darkBasic } from '../../styles/theme';
+import { darkBasic, taskItemPad, simpleBorderWidth } from '../../styles/theme';
 import { smallTextCont, textContainer } from '../../styles/generalStyles';
 
 export const taskItem = StyleSheet.create({
   headContainer: {
     display: 'flex',
     flexDirection: 'row',
-    borderBottomWidth: 1,
+    borderBottomWidth: simpleBorderWidth,
     borderColor: darkBasic.darkGreyBorder,
-    paddingBottom: 5,
-    paddingTop: 5,
+    paddingBottom: taskItemPad,
+    paddingTop: taskItemPad,
   },
   checkBox: {
     paddingLeft: 10,

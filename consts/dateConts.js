@@ -72,13 +72,13 @@ export const weekDays = [
 ];
 
 export const wDays = [
-  { key: 'Mo' },
-  { key: 'Tu' },
-  { key: 'We' },
-  { key: 'Th' },
-  { key: 'Fr' },
-  { key: 'Sa' },
-  { key: 'Su' },
+  { key: 'Mo', title: 'Monday' },
+  { key: 'Tu', title: 'Tuesday' },
+  { key: 'We', title: 'Wednesday' },
+  { key: 'Th', title: 'Thursday' },
+  { key: 'Fr', title: 'Friday' },
+  { key: 'Sa', title: 'Saturday' },
+  { key: 'Su', title: 'Sunday' },
 ];
 
 export const hours = [
@@ -316,6 +316,8 @@ export const repTypeObjects = {
   [repTypes[2].key]: repTypes[2].title,
   [repTypes[3].key]: repTypes[3].title,
 };
+
+export const repWeeklyKey = 'weekly';
 
 export const repRemTypes = [
   { key: repTypeMins, title: 'Mins' },

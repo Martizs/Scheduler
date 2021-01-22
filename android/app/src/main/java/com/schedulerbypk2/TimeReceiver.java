@@ -78,8 +78,6 @@ public class TimeReceiver extends BroadcastReceiver {
                     String taskDate = timeData.get("time").toString();
                     String taskTitle = timeData.get("taskTitle").toString();
 
-                    String taskDesc = timeData.get("taskDesc") == null ? "" : timeData.get("taskDesc").toString();
-
                     boolean mainTimeRep = false;
 
                     int mainTimeId = (int) timeData.get("timeId");
@@ -158,24 +156,12 @@ public class TimeReceiver extends BroadcastReceiver {
                             .getApplicationInfo(packageName, PackageManager.GET_META_DATA);
                         Bundle bundle = ai.metaData;
                         int resourceID = bundle.getInt("com.schedulerbypk2.ic_launcher_round");
-
-                        int notifLayout = bundle.getInt("com.schedulerbypk2.notification");
-
-                        RemoteViews notificationLayout = new RemoteViews(packageName, notifLayout);
-
-                        // here we set the texts for the notification
-                        notificationLayout.setTextViewText(R.id.notif_time, taskDate);
-                        notificationLayout.setTextViewText(R.id.notif_title, taskTitle);
-
-                        if(taskDesc.length() > 0){
-                            notificationLayout.setTextViewText(R.id.notif_desc, taskDesc);
-                        }
                     
                         // Build the notification
                         NotificationCompat.Builder builder = new NotificationCompat.Builder(context, MainActivity.CHANNEL_ID)
                             .setSmallIcon(resourceID)
-                            .setStyle(new NotificationCompat.DecoratedCustomViewStyle())
-                            .setCustomContentView(notificationLayout)
+                            .setContentTitle(taskTitle)
+                            .setContentText(taskDate)
                             .setPriority(NotificationCompat.PRIORITY_MAX)
                             .setCategory(NotificationCompat.CATEGORY_ALARM)
                             .setAutoCancel(true)
@@ -221,7 +207,7 @@ public class TimeReceiver extends BroadcastReceiver {
                     // setting up and starting vibration
                     Vibrator vibe = (Vibrator) context.getSystemService(Context.VIBRATOR_SERVICE);
                     
-                    if(vibe.hasVibrator()){
+                    if(vibe != null && vibe.hasVibrator()){
                         int repeat = notifRing ? -1 : 0;
                         long[] pattern = new long[notifRing ? 4 : 2];
     
@@ -274,9 +260,11 @@ public class TimeReceiver extends BroadcastReceiver {
                 // this code will be executed after 5 minutes
                 }, 300000);
 
-                rnApp.getReactNativeHost().getReactInstanceManager()
+                if(MainActivity.active){
+                    rnApp.getReactNativeHost().getReactInstanceManager()
                                 .getCurrentReactContext().getJSModule(DeviceEventManagerModule.RCTDeviceEventEmitter.class)
                                 .emit("notifOpened", mainTimIds);
+                }
             }
 
         } catch (Exception e){

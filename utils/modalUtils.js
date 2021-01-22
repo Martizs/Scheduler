@@ -1,6 +1,7 @@
 import React from 'react';
 import { View, TextInput } from 'react-native';
-import ScheduleTime from '../ScheduleTime';
+/* schedule */
+import { testLogging } from '../schedule';
 /* redux */
 import { toggleModal } from '../redux/general/actions';
 /* components */

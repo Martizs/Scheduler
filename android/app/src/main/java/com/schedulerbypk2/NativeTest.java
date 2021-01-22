@@ -66,7 +66,7 @@ public class NativeTest extends ReactContextBaseJavaModule {
 
             String resp = dbAdapter.dontRepRem(mainTimeId);
 
-            if(resp.indexOf("error") != -1) {
+            if(resp.contains("error")) {
                 Utils.onError(reactContext, -1, -1, "DontRemReceiver db update error: " + resp);
             }
 

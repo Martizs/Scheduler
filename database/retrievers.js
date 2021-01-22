@@ -25,8 +25,12 @@ export function getTimeTasks(dayTasks, qParams, setData) {
 
       if (year && month && day) {
         params = [year, month, day];
-        query = `SELECT *, ${timesTable}.id as times_id FROM ${timesTable} 
-        LEFT JOIN ${tasksTable} ON ${timesTable}.${timesTFields.task_id} = ${tasksTable}.id 
+        query = `SELECT *, ${timesTable}.id as times_id, ${timesTable}.${timesTFields.done} as time_done, ${remTable}.id as rem_id, 
+        ${remTable}.${remTFields.repeatability} as rem_rep, ${remTable}.${remTFields.hours} as rem_hours, 
+        ${remTable}.${remTFields.minutes} as rem_minutes, ${remTable}.${remTFields.done} as rem_done
+        FROM ${timesTable}
+        LEFT JOIN ${remTable} ON ${timesTable}.id = ${remTable}.time_id
+        LEFT JOIN ${tasksTable} ON ${timesTable}.${timesTFields.task_id} = ${tasksTable}.id
         WHERE ${timesTFields.year}=? AND ${timesTFields.month}=? AND ${timesTFields.day}=?`;
       }
     } else {
@@ -44,42 +48,78 @@ export function getTimeTasks(dayTasks, qParams, setData) {
           params,
           async (tx1, res1) => {
             const formedData = [];
+            let reminders = [];
+            let currId = -1;
+            let tTaskFormed = null;
+
             for (let i = 0; i < res1.rows.length; i++) {
               const timeTaskItem = res1.rows.item(i);
 
-              let dateName = '';
+              if (currId !== timeTaskItem.id) {
+                if (tTaskFormed) {
+                  tTaskFormed.reminders = reminders;
+                  formedData.push(tTaskFormed);
+                }
 
-              dateName = await formNamedDate(
-                timeTaskItem.year,
-                parseInt(timeTaskItem.month, 10) - 1,
-                timeTaskItem.day
-              ).catch((err) => {
-                console.log('formNamedDate error in getTimeTasks', err);
-              });
+                reminders = [];
+                currId = timeTaskItem.id;
 
-              const timeId = timeTaskItem.times_id;
+                let dateName = '';
 
-              const tTaskFormed = {
-                key: timeId + '',
-                task_id: timeTaskItem.task_id,
-                title: timeTaskItem.title,
-                description: timeTaskItem.desc,
-                hours: timeTaskItem.hours,
-                minutes: timeTaskItem.minutes,
-                year: timeTaskItem.year + '',
-                month: timeTaskItem.month,
-                day: timeTaskItem.day,
-                done: timeTaskItem.done,
-                repEndTime: timeTaskItem.rep_end_time,
-                repeatability: timeTaskItem.repeatability,
-                dateName,
-                afterLinks:
-                  timeTaskItem.afterLinks &&
-                  JSON.parse(timeTaskItem.afterLinks),
-              };
+                dateName = await formNamedDate(
+                  timeTaskItem.year,
+                  parseInt(timeTaskItem.month, 10) - 1,
+                  timeTaskItem.day
+                ).catch((err) => {
+                  console.log('formNamedDate error in getTimeTasks', err);
+                });
 
+                const timeId = timeTaskItem.times_id;
+
+                tTaskFormed = {
+                  key: timeId + '',
+                  task_id: timeTaskItem.task_id,
+                  title: timeTaskItem.title,
+                  description: timeTaskItem.desc,
+                  hours: timeTaskItem.hours,
+                  minutes: timeTaskItem.minutes,
+                  year: timeTaskItem.year + '',
+                  month: timeTaskItem.month,
+                  day: timeTaskItem.day,
+                  done: timeTaskItem.time_done,
+                  repEndTime: timeTaskItem.rep_end_time,
+                  repeatability: timeTaskItem.repeatability,
+                  dateName,
+                  afterLinks:
+                    timeTaskItem.afterLinks &&
+                    JSON.parse(timeTaskItem.afterLinks),
+                };
+              }
+
+              if (!qParams.timeId && timeTaskItem.same_time !== null) {
+                const rem_rep =
+                  timeTaskItem.rem_rep && JSON.parse(timeTaskItem.rem_rep);
+                reminders.push({
+                  id: timeTaskItem.rem_id,
+                  before: JSON.parse(timeTaskItem.before),
+                  notif: timeTaskItem.notif,
+                  selHour: timeTaskItem.rem_hours,
+                  selMin: timeTaskItem.rem_minutes,
+                  sameTime: timeTaskItem.same_time,
+                  done: timeTaskItem.rem_done,
+                  repRem:
+                    !!rem_rep?.type && (!!rem_rep.number || !!rem_rep.values),
+                  repeat: rem_rep,
+                  taskRemId: timeTaskItem.task_rem_id,
+                });
+              }
+            }
+
+            if (tTaskFormed) {
+              tTaskFormed.reminders = reminders;
               formedData.push(tTaskFormed);
             }
+
             setData(formedData);
             // console.log('formedData', formedData);
             resolve();
@@ -124,6 +164,7 @@ export function getRems(timeTaskId, extraRes, callBack, errCallback) {
               ...extraRes,
             });
           }
+
           if (callBack) {
             callBack(reminders);
           }
@@ -147,7 +188,7 @@ export function getRems(timeTaskId, extraRes, callBack, errCallback) {
   });
 }
 
-export function getDefSort(callBack) {
+export function getSettings(callBack) {
   return new Promise((resolve) => {
     db.transaction((tx) => {
       tx.executeSql(
@@ -155,7 +196,10 @@ export function getDefSort(callBack) {
         [1],
         (tx1, res1) => {
           if (res1.rows.length) {
-            callBack(res1.rows.item(0)[setTFields.defSort]);
+            callBack({
+              [setTFields.defSort]: res1.rows.item(0)[setTFields.defSort],
+              [setTFields.homePage]: res1.rows.item(0)[setTFields.homePage],
+            });
           } else {
             console.log('nothing found in settings, wut?');
           }

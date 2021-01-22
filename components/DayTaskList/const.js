@@ -4,6 +4,10 @@ export const menuItems = [
     key: 'edit',
   },
   {
+    title: 'Move',
+    key: 'move',
+  },
+  {
     title: 'Delete',
     key: 'del',
   },

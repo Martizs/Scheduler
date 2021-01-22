@@ -2,15 +2,24 @@ import React from 'react';
 import { View, Dimensions, FlatList, Text, ToastAndroid } from 'react-native';
 /* styles */
 import { dTasks, ddListWidth } from './style';
-import { smallIconSize } from '../../styles/theme';
+import {
+  checkBoxHeight,
+  simpleBorderWidth,
+  simpleTextFS,
+  smallIconSize,
+  taskItemPad,
+} from '../../styles/theme';
 /* redux */
 import { connect } from 'react-redux';
 import {
   addBackAction,
+  addExtraInfo,
+  clearExtraInfo,
   remBackAction,
+  setInitItemId,
   switchScreen,
   toggleModal,
-  updateSettings,
+  updatePropSort,
 } from '../../redux/general/actions';
 import {
   setSelSpecDay,
@@ -26,6 +35,7 @@ import {
   titleBarHeight,
   rndTxtInputOffset,
   searchInpHeight,
+  MONTH,
 } from '../../consts/generalConsts';
 import {
   menuItems,
@@ -58,9 +68,11 @@ import { dispatchDbCall } from '../../database/helpers';
 
 class DayTaskList extends React.Component {
   constructor(props) {
-    super();
+    super(props);
 
     this.mounted = true;
+
+    this.genTaskItemHeight();
 
     this.state = {
       dropDown: false,
@@ -80,6 +92,8 @@ class DayTaskList extends React.Component {
       resetMon: false,
       resetYea: false,
       resetDay: false,
+      mountDataLoaded: false,
+      initScroll: 0,
     };
 
     this.scrollToIndex = this.scrollToIndex.bind(this);
@@ -106,6 +120,9 @@ class DayTaskList extends React.Component {
     this.onMItemPress = this.onMItemPress.bind(this);
     this.onYItemPress = this.onYItemPress.bind(this);
     this.setInputXY = this.setInputXY.bind(this);
+    this.editTask = this.editTask.bind(this);
+    this.genTaskItemHeight = this.genTaskItemHeight.bind(this);
+    this.cancelMove = this.cancelMove.bind(this);
   }
 
   componentDidMount() {
@@ -150,6 +167,12 @@ class DayTaskList extends React.Component {
     if (this.props.defSort !== prevProps.defSort) {
       this.setDayTasks();
     }
+
+    if (!this.props.moveItem && this.props.moveItem !== prevProps.moveItem) {
+      dispatchDbCall(() =>
+        getTimeTasks(true, { year, month: month + 1, day }, this.setDayTasks)
+      );
+    }
   }
 
   componentWillUnmount() {
@@ -159,19 +182,31 @@ class DayTaskList extends React.Component {
   }
 
   taskLoad() {
-    const { year, month, day } = this.props.selDay;
+    const { selDay } = this.props;
+
+    let year = selDay.year;
+    let month = selDay.month;
+    let day = selDay.day;
+
+    if (this.props.loadInit) {
+      const date = new Date();
+      year = date.getFullYear();
+      month = date.getMonth();
+      day = date.getDate();
+    }
+
     if (this.props.noRepCheck) {
       dispatchDbCall(() =>
-        getTimeTasks(true, { year, month: month + 1, day }, this.setDayTasks)
+        getTimeTasks(true, { year, month: month + 1, day }, (dayTasks) =>
+          this.setDayTasks(dayTasks, true)
+        )
       );
     } else {
       dispatchDbCall(() =>
         createRep(year, month, () =>
           dispatchDbCall(() =>
-            getTimeTasks(
-              true,
-              { year, month: month + 1, day },
-              this.setDayTasks
+            getTimeTasks(true, { year, month: month + 1, day }, (dayTasks) =>
+              this.setDayTasks(dayTasks, true)
             )
           )
         )
@@ -179,26 +214,71 @@ class DayTaskList extends React.Component {
     }
   }
 
-  setDayTasks(dayTasks = this.state.taskData) {
-    const sortParams = getSortParams(dayTasks, this.props.defSort);
+  setDayTasks(dayTasks = this.state.taskData, mountDataLoaded) {
+    if (
+      this.props.initItemId ||
+      this.props.moveItem ||
+      this.state.initScroll !== 0
+    ) {
+      this.setState({ taskData: [] });
+    }
+
+    const newDayTasks = [...dayTasks];
+    const sortParams = getSortParams(newDayTasks, this.props.defSort);
     const stateObject = {
       genTask: sortParams.genTask,
       timedTask: sortParams.timedTask,
+      initScroll: 0,
     };
 
+    if (!this.state.mountDataLoaded && mountDataLoaded) {
+      stateObject.mountDataLoaded = mountDataLoaded;
+    }
+
+    if (this.props.moveItem) {
+      const existInd = findIndex(newDayTasks, ['key', this.props.moveItem.key]);
+      if (existInd === -1) {
+        newDayTasks.push(this.props.moveItem);
+      }
+    }
+
     if (this.props.defSort === 'linked') {
-      stateObject.taskData = linkedSorting(dayTasks);
+      stateObject.taskData = linkedSorting(newDayTasks);
     } else {
       stateObject.taskData = sortTasks(
         sortParams.top,
         sortParams.asc,
-        dayTasks,
+        newDayTasks,
         sortParams.genTask && !sortParams.timedTask
       );
     }
 
+    let initItemInd = -1;
+    if (this.props.initItemId) {
+      this.genTaskItemHeight();
+      initItemInd = findIndex(stateObject.taskData, [
+        'key',
+        this.props.initItemId + '',
+      ]);
+      stateObject.initScroll = initItemInd;
+    }
+
+    if (this.props.moveItem) {
+      this.genTaskItemHeight();
+      stateObject.initScroll = findIndex(stateObject.taskData, [
+        'key',
+        this.props.moveItem.key,
+      ]);
+    }
+
     if (this.mounted) {
-      this.setState(stateObject);
+      if (this.props.initItemId && initItemInd !== -1) {
+        this.setState(stateObject, () =>
+          this.props.dispatch(setInitItemId(null))
+        );
+      } else {
+        this.setState(stateObject);
+      }
     }
   }
 
@@ -268,6 +348,33 @@ class DayTaskList extends React.Component {
       });
   }
 
+  editTask(
+    key,
+    task_id,
+    hours,
+    minutes,
+    desc,
+    title,
+    done,
+    afterLinks,
+    repParsed
+  ) {
+    this.props.dispatch(
+      switchScreen(TASK, false, false, {
+        id: key,
+        task_id,
+        hours,
+        minutes,
+        desc,
+        title,
+        update: true,
+        done,
+        afterLinks,
+        repeatability: repParsed,
+      })
+    );
+  }
+
   onItemPress(item) {
     const {
       hours,
@@ -285,19 +392,16 @@ class DayTaskList extends React.Component {
 
     switch (item.key) {
       case 'edit': {
-        this.props.dispatch(
-          switchScreen(TASK, false, false, {
-            id: key,
-            task_id,
-            hours,
-            minutes,
-            desc,
-            title,
-            update: true,
-            done,
-            afterLinks,
-            repeatability: repParsed,
-          })
+        this.editTask(
+          key,
+          task_id,
+          hours,
+          minutes,
+          desc,
+          title,
+          done,
+          afterLinks,
+          repParsed
         );
         break;
       }
@@ -307,7 +411,11 @@ class DayTaskList extends React.Component {
           const delInt = findIndex(taskData, ['key', key]);
           if (delInt !== -1) {
             taskData.splice(delInt, 1);
-            this.setState({ taskData });
+            let newTaskData = taskData;
+            if (this.props.defSort === 'linked') {
+              newTaskData = linkedSorting(newTaskData);
+            }
+            this.setState({ taskData: newTaskData });
           } else {
             ToastAndroid.showWithGravityAndOffset(
               'Some error occured while deleting the task, please report it',
@@ -372,6 +480,45 @@ class DayTaskList extends React.Component {
             />
           )
         );
+        break;
+      }
+      case 'move': {
+        this.props.dispatch(addBackAction('cancel_move', this.cancelMove));
+        if (!this.props.taskPrev) {
+          this.props.dispatch(
+            switchScreen(MONTH, false, false, {
+              move: true,
+              moveItem: {
+                id: parseInt(this.state.selItem.key, 10),
+                ...this.state.selItem,
+              },
+            })
+          );
+        } else {
+          this.props.dispatch(
+            addExtraInfo(MONTH, {
+              move: true,
+              moveItem: {
+                id: parseInt(this.state.selItem.key, 10),
+                ...this.state.selItem,
+              },
+              mViaMonth: true,
+            })
+          );
+        }
+        if (
+          repParsed &&
+          repParsed.type &&
+          (repParsed.number || repParsed.values)
+        ) {
+          ToastAndroid.showWithGravityAndOffset(
+            'Task will be turned into a single task once moved',
+            ToastAndroid.LONG,
+            ToastAndroid.BOTTOM,
+            0,
+            50
+          );
+        }
         break;
       }
       default:
@@ -498,7 +645,7 @@ class DayTaskList extends React.Component {
 
   onSortSelect(item) {
     this.setSortDD(false);
-    this.props.dispatch(updateSettings(item.key));
+    this.props.dispatch(updatePropSort(item.key));
     dispatchDbCall(() => updateSort(item.key));
   }
 
@@ -613,6 +760,29 @@ class DayTaskList extends React.Component {
     });
   }
 
+  genTaskItemHeight() {
+    this.taskItHeight = simpleBorderWidth + taskItemPad * 2;
+    if (this.props.moveItem || simpleTextFS > checkBoxHeight) {
+      // so if its the move item, there's no check box height
+      // so we'll use the base height of text
+      // ALSO we add in static + 8 cause that seems to be the approximate hight
+      // we need to keep the item scrolled to properly visible
+      // when using fontsize as the base height
+      // NOTE: difference
+      this.taskItHeight += simpleTextFS + 8;
+    } else {
+      this.taskItHeight += checkBoxHeight;
+    }
+  }
+
+  cancelMove() {
+    if (this.props.moveItem) {
+      this.props.dispatch(clearExtraInfo(MONTH));
+    } else {
+      this.props.dispatch(switchScreen(false, true));
+    }
+  }
+
   render() {
     const sortButStyle =
       !this.props.taskPrev && !this.state.portrait
@@ -629,6 +799,8 @@ class DayTaskList extends React.Component {
             width: '50%',
           }
         : dTasks.sortDDCont;
+
+    const { moveItem } = this.props;
 
     return (
       <View
@@ -654,31 +826,56 @@ class DayTaskList extends React.Component {
         )}
         {this.state.taskData.length ? (
           <View style={dTasks.container}>
-            {this.state.genTask && this.state.taskData.length > 1 && (
-              <IconButton
-                setRef={(ref) => {
-                  this.sortRef = ref;
-                }}
-                text={sortItemTitles[this.props.defSort]}
-                contStyle={sortButStyle}
-                iconName="sort"
-                onPress={this.onSortPress}
-              />
-            )}
+            {!this.props.taskPrev &&
+              this.state.genTask &&
+              this.state.taskData.length > 1 && (
+                <IconButton
+                  setRef={(ref) => {
+                    this.sortRef = ref;
+                  }}
+                  text={sortItemTitles[this.props.defSort]}
+                  contStyle={sortButStyle}
+                  iconName="sort"
+                  onPress={this.onSortPress}
+                />
+              )}
             <FlatList
               ref={(ref) => {
                 this.listRef = ref;
               }}
+              getItemLayout={(data, index) => ({
+                length: this.taskItHeight,
+                offset: this.taskItHeight * index,
+                index,
+              })}
+              initialScrollIndex={this.state.initScroll}
               style={dTasks.listStyle}
               data={[...this.state.taskData, ...invItems]}
               renderItem={({ item, index }) => (
                 <TaskItem
                   item={item}
                   done={item.done}
+                  initItemId={this.props.initItemId}
+                  highlight={moveItem && item.key === moveItem.key}
+                  noCheckBox={!!moveItem}
+                  noOptions={!!moveItem}
                   onCheck={() => this.onCheck(item.key, item.done, index)}
                   windHeight={this.state.windHeight}
                   optionPress={this.optionPress}
                   onDetOut={() => this.scrollToIndex(index)}
+                  editTask={() =>
+                    this.editTask(
+                      item.key,
+                      item.task_id,
+                      item.hours,
+                      item.minutes,
+                      item.description,
+                      item.title,
+                      item.done,
+                      item.afterLinks,
+                      item.repeatability && JSON.parse(item.repeatability)
+                    )
+                  }
                 />
               )}
             />
@@ -755,6 +952,7 @@ const mapStateToProps = (state) => ({
   screenKey: state.currScreen.screenKey,
   defSort: state.settings.defSort,
   actMen: state.currScreen.actMen,
+  initItemId: state.initItemId,
 });
 
 const mapDispatchToProps = (dispatch) => ({

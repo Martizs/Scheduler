@@ -6,9 +6,13 @@ import { screenContainer } from '../../styles/generalStyles';
 import DayTaskList from '../../components/DayTaskList';
 /* redux */
 import { connect } from 'react-redux';
+import { clearExtraInfo } from '../../redux/general/actions';
 /* utils */
+import findLast from 'lodash/findLast';
 import findIndex from 'lodash/findIndex';
 import { genDays } from '../../utils/dateUtils';
+/* consts */
+import { DAY } from '../../consts/generalConsts';
 
 const DayTasks = (props) => {
   const isInitialMount = React.useRef(true);
@@ -32,20 +36,27 @@ const DayTasks = (props) => {
         genDays(selDay, true, props.dispatch);
       }
     }
+    return () => {
+      props.dispatch(clearExtraInfo(DAY));
+    };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selDay]);
 
   return (
     <View style={screenContainer.style}>
-      <DayTaskList selDay={props.selDay} />
+      <DayTaskList selDay={props.selDay} loadInit={props.extraInfo.loadInit} />
     </View>
   );
 };
 
-const mapStateToProps = (state) => ({
-  selDay: state.selDay,
-  calDays: state.calDays.data,
-});
+const mapStateToProps = (state) => {
+  const navItem = findLast(state.currScreen.navRoute, ['key', DAY]);
+  return {
+    selDay: state.selDay,
+    calDays: state.calDays.data,
+    extraInfo: navItem ? navItem.extraInfo : {},
+  };
+};
 
 const mapDispatchToProps = (dispatch) => ({
   dispatch,

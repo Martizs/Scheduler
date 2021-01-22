@@ -27,13 +27,14 @@ const TaskPreview = (props) => {
       });
   }, [props.selDay]);
 
-  const headTStyle = props.portrait
-    ? textContainer.style
-    : {
-        ...textContainer.style,
-        marginLeft: 'auto',
-        marginRight: 'auto',
-      };
+  const headTStyle =
+    !props.moveItem && props.portrait
+      ? textContainer.style
+      : {
+          ...textContainer.style,
+          marginLeft: 'auto',
+          marginRight: 'auto',
+        };
 
   const container = !props.portrait
     ? {
@@ -46,11 +47,12 @@ const TaskPreview = (props) => {
     <View style={container}>
       <TouchableOpacity
         style={taskPrev.header}
+        disabled={!!props.moveItem}
         onPress={() => props.dispatch(switchScreen(DAY))}
       >
-        {props.portrait && <View style={taskPrev.invItem} />}
+        {!props.moveItem && props.portrait && <View style={taskPrev.invItem} />}
         <Text style={headTStyle}>{dateName}</Text>
-        {props.portrait && (
+        {!props.moveItem && props.portrait && (
           <Icon
             name="keyboard-arrow-up"
             size={smallIconSize}
@@ -59,6 +61,8 @@ const TaskPreview = (props) => {
         )}
       </TouchableOpacity>
       <DayTaskList
+        loadInit={props.loadInit}
+        moveItem={props.moveItem}
         noRepCheck
         notFullWidth={!props.portrait}
         taskPrev

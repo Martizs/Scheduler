@@ -11,7 +11,7 @@ import {
   setTable,
   setTFields,
 } from '../consts/dbConsts';
-import { titleLength, desLength } from '../consts/generalConsts';
+import { titleLength, desLength, MONTH } from '../consts/generalConsts';
 import { sortItems } from '../components/DayTaskList/const';
 import { exeSqlPromise } from './helpers';
 /* redux */
@@ -24,7 +24,7 @@ db.executeSql('PRAGMA foreign_keys=ON');
 
 // helper function that creates the database with all needed tables fields etc.
 // a table does not already exist
-export async function createDb() {
+export async function createDb(callBack) {
   // tasks table
   /* rep_end_time - stores the last saved time of the current repeatable task
     this along with the field repeatability is only for repeatable tasks
@@ -85,7 +85,9 @@ export async function createDb() {
     createDbProm.push(createRems);
 
     const createSet = await exeSqlPromise(
-      `CREATE TABLE IF NOT EXISTS ${setTable}(id INTEGER PRIMARY KEY AUTOINCREMENT, ${setTFields.defSort} BOOLEAN)`,
+      `CREATE TABLE IF NOT EXISTS ${setTable}(id INTEGER PRIMARY KEY AUTOINCREMENT, 
+        ${setTFields.defSort} BOOLEAN, 
+        ${setTFields.homePage} VARCHAR(30))`,
       []
     );
 
@@ -95,8 +97,8 @@ export async function createDb() {
       if (checkSet.rows) {
         if (!checkSet.rows.length) {
           const insertInitialSet = exeSqlPromise(
-            `INSERT INTO ${setTable} (${setTFields.defSort}) VALUES (?)`,
-            [sortItems[0].key]
+            `INSERT INTO ${setTable} (${setTFields.defSort}, ${setTFields.homePage}) VALUES (?, ?)`,
+            [sortItems[0].key, MONTH]
           );
           createDbProm.push(insertInitialSet);
         } else {
@@ -107,18 +109,22 @@ export async function createDb() {
         Promise.all(createDbProm)
           .then(() => {
             console.log('initial settings table created');
+            callBack();
             resolve();
           })
           .catch((err) => {
             console.log('Error creating initial database', err);
+            callBack();
             resolve();
           });
       } else {
         console.log('error checking setting table records');
+        callBack();
         resolve();
       }
     } else {
       console.log('error creating settings table');
+      callBack();
       resolve();
     }
   });
@@ -247,13 +253,15 @@ function createFresh() {
       [],
       (tx1, res1) => {
         tx1.executeSql(
-          `CREATE TABLE IF NOT EXISTS ${setTable}(id INTEGER PRIMARY KEY AUTOINCREMENT, ${setTFields.defSort} BOOLEAN)`,
+          `CREATE TABLE IF NOT EXISTS ${setTable}(id INTEGER PRIMARY KEY AUTOINCREMENT, 
+            ${setTFields.defSort} BOOLEAN,
+            ${setTFields.homePage} VARCHAR(30))`,
           [],
           (tx2, res2) => {
             console.log('settings table droped and recreated');
             tx2.executeSql(
-              `INSERT INTO ${setTable} (${setTFields.defSort}) VALUES (?)`,
-              [sortItems[0].key],
+              `INSERT INTO ${setTable} (${setTFields.defSort}, ${setTFields.homePage}) VALUES (?, ?)`,
+              [sortItems[0].key, MONTH],
               () => {
                 // console.log('sortItems[0].key', sortItems[0].key);
                 console.log('initial settings table created and record added');
@@ -286,7 +294,7 @@ export function test(params) {
   db.transaction((txn) => {
     // NOTE: so there needs to be as many question marks as there are values you inserting
     txn.executeSql(
-      `SELECT * FROM ${tasksTable}`,
+      `SELECT * FROM ${remTable}`,
       [],
       (tx0, res0) => {
         console.log('results.rows.length', res0.rows.length);

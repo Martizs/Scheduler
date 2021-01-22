@@ -9,7 +9,6 @@ import {
   smallIconSize,
 } from '../styles/theme';
 
-export const HOME_TITLE = 'Home';
 export const TEST_TITLE = 'Test';
 export const MONTH = 'Month';
 export const DAY = 'DAY';
@@ -17,7 +16,6 @@ export const TASK = 'TASK';
 export const REMINDER = 'Reminder';
 
 export const screenTitles = {
-  [HOME_TITLE]: 'Home',
   [MONTH]: 'Calendar',
   [DAY]: 'Today',
   [TASK]: 'Task',

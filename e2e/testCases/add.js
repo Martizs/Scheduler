@@ -12,7 +12,7 @@ import { taskData } from './consts/task';
 import { taskIds } from './../../screens/Task/testIds';
 import { remIds } from '../../screens/Reminder/testIds';
 import { titBarIds } from '../../components/TitleBar/testIds';
-import { remPrevIds } from '../../screens/Task/components/RemPrev/testIds';
+import { remPrevIds } from '../../components/RemPrev/testIds';
 import { actMenIds } from '../../screens/ActionMenu/testIds';
 
 export async function addTask(

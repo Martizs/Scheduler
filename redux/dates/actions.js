@@ -27,8 +27,8 @@ export function setSelYear(selYear) {
 
 // CAL DAYS ACTIONS
 export const SET_CAL_DAYS = 'SET_CAL_DAYS';
-export function setCalDays(calDays, mainMonth, mainYear) {
-  return { type: SET_CAL_DAYS, items: { calDays, mainMonth, mainYear } };
+export function setCalDays(calDays, mainMonth, mainYear, today) {
+  return { type: SET_CAL_DAYS, items: { calDays, mainMonth, mainYear, today } };
 }
 
 export const SET_INIT_CAL_DAYS = 'SET_INIT_CAL_DAYS';

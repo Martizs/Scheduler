@@ -7,18 +7,20 @@ import {
   ToastAndroid,
   ScrollView,
   Dimensions,
+  TouchableOpacity,
 } from 'react-native';
 /* styles */
-import { darkBasic } from '../../styles/theme';
+import { darkBasic, sSmallIconSize } from '../../styles/theme';
 import { task } from './style';
 /* components */
+import Icon from 'react-native-vector-icons/MaterialIcons';
 import { GenButton } from '../../components/GenButton';
 import CheckBox from '@react-native-community/checkbox';
 import { RepeatComp } from '../../components/RepeatComp';
 import DropDownList from '../../components/DropDownList';
 import SearchInput from '../../components/SearchInput';
-import { RemPrev } from './components/RemPrev';
 import { InfoModalContent } from '../../components/Modals/InfoModal/content';
+import { RemPrev } from '../../components/RemPrev';
 /* consts */
 import {
   hours,
@@ -26,6 +28,7 @@ import {
   repTypes,
   repTypeObjects,
   befTimedTypes,
+  repWeeklyKey,
 } from '../../consts/dateConts';
 import {
   titleLength,
@@ -63,6 +66,7 @@ import {
   setSelYear,
 } from '../../redux/dates/actions';
 import { genDays } from '../../utils/dateUtils';
+import { before } from 'lodash';
 
 class TaskScreen extends React.Component {
   constructor(props) {
@@ -76,7 +80,17 @@ class TaskScreen extends React.Component {
       props.extraInfo.minutes &&
       props.extraInfo.minutes !== this.initMin;
 
+    // NOTE: if repeatability is periodical, it will be {type: "day, week, etc.", number: 0-999,}
+    // if its weekly, it will be {type: 'weekly', values: []}
     const { repeatability, desc, title } = props.extraInfo;
+
+    this.desc = desc;
+    this.title = title;
+    this.repNumber = repeatability ? repeatability.number : null;
+    this.repType =
+      repeatability && repeatability.type
+        ? repeatability.type
+        : repTypes[0].key;
 
     this.dbRems = [];
 
@@ -101,15 +115,9 @@ class TaskScreen extends React.Component {
       repTask: false,
       windHeight: Dimensions.get('window').height,
       editAll: true,
+      weeklyRep: this.repType === repWeeklyKey,
+      weeklyVals: this.repType === repWeeklyKey ? repeatability.values : [],
     };
-
-    this.desc = desc;
-    this.title = title;
-    this.repNumber = repeatability ? repeatability.number : null;
-    this.repType =
-      repeatability && repeatability.type
-        ? repeatability.type
-        : repTypes[0].key;
 
     this.setYDropDown = this.setYDropDown.bind(this);
     this.setMonDropDown = this.setMonDropDown.bind(this);
@@ -142,6 +150,8 @@ class TaskScreen extends React.Component {
     this.addEditReminder = this.addEditReminder.bind(this);
     this.delReminder = this.delReminder.bind(this);
     this.onBackPress = this.onBackPress.bind(this);
+    this.onWeekDayCheck = this.onWeekDayCheck.bind(this);
+    this.clearTime = this.clearTime.bind(this);
   }
 
   componentDidMount() {
@@ -527,21 +537,41 @@ class TaskScreen extends React.Component {
 
       let newRep = null;
       if (this.state.repTask) {
-        newRep = {
-          type: this.repType,
-          number: this.repNumber,
-        };
+        if (this.state.weeklyRep) {
+          newRep = {
+            type: repWeeklyKey,
+            values: this.state.weeklyVals,
+          };
+        } else {
+          newRep = {
+            type: this.repType,
+            number: this.repNumber,
+          };
+        }
       }
 
       const onlyPosNumbers = /^\d+$/.test(this.repNumber);
 
       if (
         this.state.repTask &&
+        !this.state.weeklyRep &&
         (!this.repNumber || !onlyPosNumbers || this.repNumber.charAt(0) === '0')
       ) {
         ToastAndroid.showWithGravityAndOffset(
           'You need to provide a valid repeat number for the repeatable task',
-          ToastAndroid.SHORT,
+          ToastAndroid.LONG,
+          ToastAndroid.BOTTOM,
+          0,
+          50
+        );
+      } else if (
+        this.state.repTask &&
+        this.state.weeklyRep &&
+        !this.state.weeklyVals.length
+      ) {
+        ToastAndroid.showWithGravityAndOffset(
+          'You need to select at least one week number',
+          ToastAndroid.LONG,
           ToastAndroid.BOTTOM,
           0,
           50
@@ -625,6 +655,51 @@ class TaskScreen extends React.Component {
     });
   }
 
+  onWeekDayCheck(value) {
+    const newWeekVal = this.state.weeklyVals;
+    const foundInd = newWeekVal.indexOf(value);
+    if (foundInd !== -1) {
+      newWeekVal.splice(foundInd, 1);
+    } else {
+      newWeekVal.push(value);
+    }
+  }
+
+  clearTime() {
+    const stateObj = {
+      selHour: this.initHour,
+      selMin: this.initMin,
+    };
+    if (this.state.reminders.length) {
+      const newReminders = [...this.state.reminders];
+      let remsRemoved = false;
+      this.state.reminders.forEach((reminder) => {
+        if (
+          reminder.sameTime === 0 ||
+          (reminder.sameTime === 2 &&
+            (reminder.before.type === 'hours' ||
+              reminder.before.type === 'minutes'))
+        ) {
+          const remInd = findIndex(newReminders, ['id', reminder.id]);
+          newReminders.splice(remInd, 1);
+          remsRemoved = true;
+        }
+      });
+
+      if (remsRemoved) {
+        stateObj.reminders = newReminders;
+        ToastAndroid.showWithGravityAndOffset(
+          'Task time related reminders have been removed',
+          ToastAndroid.LONG,
+          ToastAndroid.BOTTOM,
+          0,
+          50
+        );
+      }
+    }
+    this.setState(stateObj);
+  }
+
   render() {
     const { repeatability, update } = this.props.extraInfo;
 
@@ -662,33 +737,47 @@ class TaskScreen extends React.Component {
               />
             )}
             <View style={timeCont}>
-              <SearchInput
-                testID={taskIds.hourInp}
-                setDropDown={this.setHDropDown}
-                itemSel={this.state.selHour + ''}
-                data={hours}
-                resetItem={this.state.resetH}
-                toggleResItem={this.toggleHourRes}
-                numeric
-                setInputXY={this.setInputXY}
-                plHGrey={this.initHour === this.state.selHour}
-                onItemPress={this.onHItemPress}
-                singleAutoSel
-              />
-              <Text style={task.sepContainer}>:</Text>
-              <SearchInput
-                testID={taskIds.minInp}
-                setDropDown={this.setMDropDown}
-                itemSel={this.state.selMin + ''}
-                data={minutes}
-                resetItem={this.state.resetM}
-                toggleResItem={this.toggleMinRes}
-                numeric
-                setInputXY={this.setInputXY}
-                plHGrey={this.initMin === this.state.selMin}
-                onItemPress={this.onMItemPress}
-                singleAutoSel
-              />
+              <View style={task.timeInCont}>
+                <SearchInput
+                  testID={taskIds.hourInp}
+                  setDropDown={this.setHDropDown}
+                  itemSel={this.state.selHour + ''}
+                  data={hours}
+                  resetItem={this.state.resetH}
+                  toggleResItem={this.toggleHourRes}
+                  numeric
+                  setInputXY={this.setInputXY}
+                  plHGrey={this.initHour === this.state.selHour}
+                  onItemPress={this.onHItemPress}
+                  singleAutoSel
+                />
+                <Text style={task.sepContainer}>:</Text>
+                <SearchInput
+                  testID={taskIds.minInp}
+                  setDropDown={this.setMDropDown}
+                  itemSel={this.state.selMin + ''}
+                  data={minutes}
+                  resetItem={this.state.resetM}
+                  toggleResItem={this.toggleMinRes}
+                  numeric
+                  setInputXY={this.setInputXY}
+                  plHGrey={this.initMin === this.state.selMin}
+                  onItemPress={this.onMItemPress}
+                  singleAutoSel
+                />
+                {this.state.selHour !== 'hours' && (
+                  <TouchableOpacity
+                    style={task.clearBut}
+                    onPress={this.clearTime}
+                  >
+                    <Icon
+                      name="refresh"
+                      size={sSmallIconSize}
+                      color={darkBasic.textColor}
+                    />
+                  </TouchableOpacity>
+                )}
+              </View>
             </View>
             <TextInput
               testID={taskIds.titInp}
@@ -719,6 +808,11 @@ class TaskScreen extends React.Component {
           />
           {!update && (
             <RepeatComp
+              weekly
+              weeklyRep={this.state.weeklyRep}
+              setRepWeekly={(weeklyRep) => this.setState({ weeklyRep })}
+              onWDayCheck={this.onWeekDayCheck}
+              weeklyVals={this.state.weeklyVals}
               onCheck={() =>
                 this.state.repTask
                   ? this.repeatableT(false)

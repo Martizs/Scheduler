@@ -1,6 +1,6 @@
 import { StyleSheet } from 'react-native';
 /* styles */
-import { darkBasic } from '../../styles/theme';
+import { darkBasic, sSmallIconSize } from '../../styles/theme';
 import {
   textContainer,
   smallTextCont,
@@ -41,6 +41,11 @@ export const task = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'center',
   },
+  timeInCont: {
+    position: 'relative',
+    display: 'flex',
+    flexDirection: 'row',
+  },
   butCont: {
     display: 'flex',
     flexDirection: 'row',
@@ -55,5 +60,11 @@ export const task = StyleSheet.create({
   repSelContainer: {
     display: 'flex',
     flexDirection: 'row',
+  },
+  clearBut: {
+    top: 7,
+    right: -sSmallIconSize,
+    position: 'absolute',
+    opacity: 0.7,
   },
 });

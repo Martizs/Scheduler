@@ -21,7 +21,7 @@ public class DontRemReceiver extends BroadcastReceiver {
 
             String resp = dbAdapter.dontRepRem(notificationId);
 
-            if(resp.indexOf("error") != -1) {
+            if(resp.contains("error")) {
                 Utils.onError(context, -1, -1, "DontRemReceiver db update error: " + resp);
             }
 

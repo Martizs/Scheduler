@@ -1,6 +1,6 @@
-import {StyleSheet} from 'react-native';
+import { StyleSheet } from 'react-native';
 /* styles */
-import {transparentBorders} from '../../../../styles/theme';
+import { transparentBorders } from '../../../../styles/theme';
 
 export const calDay = StyleSheet.create({
   container: {
@@ -8,7 +8,10 @@ export const calDay = StyleSheet.create({
     borderWidth: 2,
     borderColor: transparentBorders,
     borderRadius: 15,
-    margin: 2,
+    marginTop: 2,
+    marginBottom: 2,
+    marginLeft: '2%',
+    marginRight: '2%',
   },
   butContainer: {
     marginTop: 'auto',

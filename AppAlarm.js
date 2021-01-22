@@ -1,5 +1,6 @@
 import React from 'react';
 import { View } from 'react-native';
+import { FileLogger } from 'react-native-file-logger';
 /* styles */
 import { mainContainer } from './styles/generalStyles';
 /* main apps */
@@ -9,6 +10,12 @@ import Alarm from './screens/Alarm';
 import OrientationLoadingOverlay from 'react-native-orientation-loading-overlay';
 /* redux */
 import { connect } from 'react-redux';
+/* consts */
+import { environment } from './env';
+
+if (environment === 'production') {
+  FileLogger.configure();
+}
 
 // just a simple component wrapper
 // for loading to work for both Alarm screen

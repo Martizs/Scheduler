@@ -1,7 +1,6 @@
 package com.schedulerbypk2.debug;
 
 import com.facebook.react.bridge.WritableArray;
-import com.facebook.react.bridge.WritableMap;
 import com.facebook.react.bridge.Arguments;
 
 import android.content.Context;
@@ -57,6 +56,7 @@ public class MyDbAdapter {
                 data.put("reqCode", req_code + "");
             }
 
+            cursor.close();
             db.setTransactionSuccessful();
         } catch(Exception e) {
             data.put("error", e.getMessage());
@@ -114,6 +114,7 @@ public class MyDbAdapter {
                 data.add(row);
             }
             db.setTransactionSuccessful();
+            cursor.close();
         }  catch(Exception e) {
             data = new ArrayList<ContentValues>();
             ContentValues row = new ContentValues();
@@ -350,14 +351,14 @@ public class MyDbAdapter {
                 db.endTransaction();
                 myhelper.close();
 
-                if(respStr.indexOf("error") != -1){
+                if(respStr.contains("error")){
                     return respStr;
                 }
 
                 // Then we cancel the set time if there was any
                 String timeCancel = ScheduleTime.manageCancelTime((int) oldRingRem.get(0).get("req_code"), dbContext);
 
-                if(timeCancel.indexOf("error") != -1){
+                if(timeCancel.contains("error")){
                     return timeCancel;
                 }
 
@@ -481,6 +482,78 @@ public class MyDbAdapter {
         return number > 9 ? "" + number : "0" + number;
     }
 
+    private String getWeekDayName(Calendar date){
+        int day = date.get(Calendar.DAY_OF_WEEK);
+
+        switch (day) {
+            case Calendar.MONDAY:
+                return "Monday";
+            case Calendar.TUESDAY:
+                return "Tuesday";
+            case Calendar.WEDNESDAY:
+                return "Wednesday";
+            case Calendar.THURSDAY:
+                return "Thursday";
+            case Calendar.FRIDAY:
+                return "Friday";
+            case Calendar.SATURDAY:
+                return "Saturday";
+            case Calendar.SUNDAY:
+                return "Sunday";
+            default:
+                return "Error";
+        }
+        
+    }
+
+    private ContentValues genDateItem(Calendar date, JSONObject extraData) {
+        ContentValues dateItem = new ContentValues();
+        try {
+
+            int year = date.get(Calendar.YEAR);
+            // gotta add +1 when we save it to the db.
+            int month = date.get(Calendar.MONTH) + 1;
+            int day = date.get(Calendar.DAY_OF_MONTH);
+
+            dateItem.put("year", addZero(year));
+            dateItem.put("month", addZero(month));
+            dateItem.put("day", addZero(day));
+
+            if(extraData != null){
+                Iterator<String> extrIt = extraData.keys();
+                while(extrIt.hasNext()) {
+                    String key = extrIt.next();
+
+                    Object value = extraData.get(key);
+
+                    switch (value.getClass().getName()) {
+                        case "java.lang.Boolean":
+                            dateItem.put(key, (Boolean) value);
+                            break;
+                        case "java.lang.Double":
+                            dateItem.put(key, (double) value);
+                            break;
+                        case "java.lang.Integer":
+                            dateItem.put(key, (int) value);
+                            break;
+                        case "java.lang.String":
+                            dateItem.put(key, value.toString());
+                            break;
+                        default:
+                            dateItem.putNull(key);
+                            break;
+                    }
+                }
+            }
+
+            return dateItem;
+        } catch (Exception e) { 
+            dateItem = new ContentValues();
+            dateItem.put("error", e.getMessage());
+            return dateItem;
+        }
+    }
+
     // createRepArray for createRep
     private Object createRepArray(ArrayList datToAdd, Calendar startDate, Calendar endDate, JSONObject rep, JSONObject extraData){
         ArrayList<ContentValues> dates = datToAdd;
@@ -488,83 +561,140 @@ public class MyDbAdapter {
         Object resp = "";
 
         try {
-            // IMPORTANT: we use do while here because we want
-            // the dates to be added at least once, for such
-            // edge cases where there's a rep task for every two years
-            // and no other tasks or app interaction is happening
-            // and the task also has a reminder set, so we want to make sure
-            // that they always get created, when the last rep end time has been
-            // exceeded
-            do {
-                // this is where the adding magic happens
-                ContentValues dateItem = new ContentValues();
+            Calendar repEndCal = Calendar.getInstance();
+            boolean isWeekly = rep.getString("type").contains("weekly");
+            // NOTE: there's a lot of constant values used in the weekly logic which are just
+            // put in as strings, you can find the constant values in the javascript part
+            // of the project, ex: "weekly"
+            if(isWeekly){
+                // sooo in the weekly create rep array case we get the startDate
+                // as the rep_end_time of our task, so we'll need to add one day
+                // to our start date and get the end of week for that increased start date
+                // and do the looping and adding from there
+                // ------------------------------------------------------------------
+                // so first to make this weekly rep work we'll create two repeatabilities
+                // to add one day and to add one week
+                JSONObject dayRep = new JSONObject();
+                dayRep.put("type", "days");
+                dayRep.put("number", 1);
+                JSONObject weekRep = new JSONObject();
+                weekRep.put("type", "weeks");
+                weekRep.put("number", 1);
 
-                int year = startDate.get(Calendar.YEAR);
-                // gotta add +1 when we save it to the db.
-                int month = startDate.get(Calendar.MONTH) + 1;
-                int day = startDate.get(Calendar.DAY_OF_MONTH);
+                // NOTE: weekly repeatabilities rep end time is always MONDAY
+                boolean initial = true;
+                Calendar startWeek = Calendar.getInstance();
+                startWeek.setTime(startDate.getTime());
+                startWeek.setFirstDayOfWeek(Calendar.MONDAY);
+                Calendar endWeek = Calendar.getInstance();
+                endWeek.setTime(startDate.getTime());
+                endWeek.setFirstDayOfWeek(Calendar.MONDAY);
+                endWeek.set(Calendar.DAY_OF_WEEK, Calendar.SUNDAY);
 
-                dateItem.put("year", addZero(year));
-                dateItem.put("month", addZero(month));
-                dateItem.put("day", addZero(day));
+                String weekVals = rep.getJSONArray("values").toString();
 
-                if(extraData != null){
-                    Iterator<String> extrIt = extraData.keys();
-                    while(extrIt.hasNext()) {
-                        String key = extrIt.next();
+                do {
 
-                        Object value = extraData.get(key);
+                    if(initial){
+                        initial = false;
+                    } else {
+                        startWeek = Calendar.getInstance();
+                        startWeek.setTime(startDate.getTime());
+                        startWeek.setFirstDayOfWeek(Calendar.MONDAY);
+                        startWeek.set(Calendar.DAY_OF_WEEK, Calendar.MONDAY);
 
-                        switch (value.getClass().getName()) {
-                            case "java.lang.Boolean":
-                                dateItem.put(key, (Boolean) value);
-                                break;
-                            case "java.lang.Double":
-                                dateItem.put(key, (double) value);
-                                break;
-                            case "java.lang.Integer":
-                                dateItem.put(key, (int) value);
-                                break;
-                            case "java.lang.String":
-                                dateItem.put(key, value.toString());
-                                break;
-                            default:
-                                dateItem.putNull(key);
-                                break;
+                        endWeek = Calendar.getInstance();
+                        endWeek.setTime(startDate.getTime());
+                        endWeek.setFirstDayOfWeek(Calendar.MONDAY);
+                        endWeek.set(Calendar.DAY_OF_WEEK, Calendar.SUNDAY);
+                    }
+
+                    do {
+
+                        String weekName = getWeekDayName(startWeek);
+
+                        if(weekName.contains("Error")){
+                            throw new Exception("getWeekDayName name error");
                         }
 
-                        
+                        if(weekVals.contains(weekName)){
+                            ContentValues dateItem = genDateItem(startWeek, extraData);
+
+                            if(dateItem.containsKey("error")){
+                                throw new Exception(dateItem.getAsString("error"));
+                            }
+
+                            dates.add(dateItem);
+                        }
+    
+                        Object newDateResp = changeDate(startWeek, dayRep, true);
+    
+                        if(newDateResp.getClass().getName().equals("java.lang.String")) {
+                            throw new Exception(newDateResp.toString());
+                        }
+    
+                        startWeek = (Calendar) newDateResp;
+                        repEndCal = startWeek;
+    
+                    } while (startWeek.getTime().before(endWeek.getTime()) || startWeek.getTime().equals(endWeek.getTime()));
+
+                    Object newDateResp = changeDate(startDate, weekRep, true);
+    
+                    if(newDateResp.getClass().getName().equals("java.lang.String")) {
+                        throw new Exception(newDateResp.toString());
                     }
-                    
-                }
 
-                dates.add(dateItem);
-
-                Object cDateResp = changeDate(startDate, rep, true);
-
-                if(cDateResp.getClass().getName().equals("java.lang.String")) {
-                    throw new Exception(cDateResp.toString());
-                }
-
-                startDate = (Calendar) cDateResp;
+                    startDate = (Calendar) newDateResp;
 
                 } while (startDate.getTime().before(endDate.getTime()));
 
-                HashMap<String, Object> results = new HashMap<String, Object>();
-                results.put("dates", dates);
+            } else {
+                // IMPORTANT: we use do while here because we want
+                // the dates to be added at least once, for such
+                // edge cases where there's a rep task for every two years
+                // and no other tasks or app interaction is happening
+                // and the task also has a reminder set, so we want to make sure
+                // that they always get created, when the last rep end time has been
+                // exceeded
+                do {
+                    ContentValues dateItem = genDateItem(startDate, extraData);
 
+                    if(dateItem.containsKey("error")){
+                        throw new Exception(dateItem.getAsString("error"));
+                    }
+
+                    dates.add(dateItem);
+
+
+                    Object cDateResp = changeDate(startDate, rep, true);
+
+                    if(cDateResp.getClass().getName().equals("java.lang.String")) {
+                        throw new Exception(cDateResp.toString());
+                    }
+
+                    startDate = (Calendar) cDateResp;
+
+                } while (startDate.getTime().before(endDate.getTime()));
+            }
+
+            HashMap<String, Object> results = new HashMap<String, Object>();
+            results.put("dates", dates);
+
+            if(!isWeekly){
                 Object cDateResp = changeDate(startDate, rep, false);
 
                 if(cDateResp.getClass().getName().equals("java.lang.String")) {
                     throw new Exception(cDateResp.toString());
                 }
 
+                repEndCal = (Calendar) cDateResp;
+            }
 
-                String repEndTime = formatter.format(((Calendar) cDateResp).getTime());
-                results.put("repEndTime", repEndTime);
 
-                resp = results;
+            String repEndTime = formatter.format(repEndCal.getTime());
+            results.put("repEndTime", repEndTime);
 
+            resp = results;
         } catch (Exception e) {
             resp = "error: Exception createRepArray: " + e.getMessage();
         } finally {
@@ -694,14 +824,19 @@ public class MyDbAdapter {
 
                     startDate.setTime(formatter.parse(startDateStr));
 
-                    Object cDateResp = changeDate(startDate, rep, true);
+                    // NOTE: we check here for 'weekly' rep type, as it will be handled
+                    // in a different way than normal repeatability, 'weekly' is the
+                    // constant value of this type of repeatability
+                    if(rep.getString("type") != null && !rep.getString("type").contains("weekly")){
+                        Object cDateResp = changeDate(startDate, rep, true);
 
-                    if(cDateResp.getClass().getName().equals("java.lang.String")) {
-                        resp = "change date error: " + cDateResp.toString();
-                        return resp;
+                        if(cDateResp.getClass().getName().equals("java.lang.String")) {
+                            resp = "change date error: " + cDateResp.toString();
+                            return resp;
+                        }
+
+                        startDate = (Calendar) cDateResp;
                     }
-
-                    startDate = (Calendar) cDateResp;
 
                     JSONObject extraData = new JSONObject();
                     extraData.put("task_id", (int) task.get("id"));
@@ -902,10 +1037,10 @@ public class MyDbAdapter {
         } catch (Exception e){
             resp = "error: Exception caught in createRep: " + e.getMessage();
         } finally {
-            if(resp.indexOf("error") == -1) {
+            if(!resp.contains("error")) {
                 String schedResp = scheduleRing();
 
-                if(schedResp.indexOf("error") != -1) {
+                if(schedResp.contains("error")) {
                     resp = schedResp;
                     return resp;
                 }
@@ -986,7 +1121,7 @@ public class MyDbAdapter {
     
                                 ringDateStr = genNewRing(dateString, ringDateStr, rep);
     
-                                if(ringDateStr.indexOf("error") != -1){
+                                if(ringDateStr.contains("error")){
                                     retStr = ringDateStr;
                                     return retStr;
                                 }
@@ -1111,7 +1246,7 @@ public class MyDbAdapter {
 
                             String repResp = createRep(calDate.get(Calendar.YEAR), calDate.get(Calendar.MONTH));
 
-                            if(repResp.indexOf("error") != -1){
+                            if(repResp.contains("error")){
                                 retStr = repResp;
                                 return retStr;
                             }

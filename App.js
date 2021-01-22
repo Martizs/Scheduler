@@ -17,7 +17,6 @@ import {
 } from './styles/generalStyles';
 import { darkBasic } from './styles/theme';
 /* screens */
-import { Home } from './screens/home';
 import Month from './screens/Month';
 import DayTasks from './screens/DayTasks';
 import TaskScreen from './screens/Task';
@@ -34,7 +33,6 @@ import DropDownList from './components/DropDownList';
 import { FloatingButton } from './components/FloatingButton';
 /* consts */
 import {
-  HOME_TITLE,
   MONTH,
   DAY,
   backgroundImage,
@@ -44,6 +42,7 @@ import {
 } from './consts/generalConsts';
 import { appIds } from './appIds';
 /* utils */
+import findLast from 'lodash/findLast';
 import isEqual from 'lodash/isEqual';
 import findIndex from 'lodash/findIndex';
 import { formNamedDate, genDays } from './utils/dateUtils';
@@ -58,13 +57,17 @@ import {
   remBackAction,
   toggleModal,
   updateSettings,
-  initScreen,
+  toggleLoading,
+  setScreen,
+  clearExtraInfo,
+  setInitDate,
 } from './redux/general/actions';
 import { setSelSpecDay, setSelMonth, setSelYear } from './redux/dates/actions';
 /* database */
 import { createDb } from './database';
 import { dispatchDbCall } from './database/helpers';
-import { getDefSort } from './database/retrievers';
+import { getSettings } from './database/retrievers';
+import { environment } from './env';
 
 class App extends React.Component {
   constructor(props) {
@@ -72,9 +75,11 @@ class App extends React.Component {
 
     const date = new Date();
 
+    this.mounted = true;
+
     this.state = {
       showMenu: false,
-      currCompArr: [{ component: <Home key="0" />, title: HOME_TITLE }],
+      currCompArr: [{ component: <View key="0" />, title: '' }],
       screenTitle: '',
       initMonth: date.getMonth(),
       initYear: date.getFullYear(),
@@ -97,6 +102,9 @@ class App extends React.Component {
   }
 
   componentDidMount() {
+    this.mounted = true;
+    this.props.dispatch(toggleLoading(true));
+
     // listeners
     Dimensions.addEventListener('change', this.changeDimensions);
     AppState.addEventListener('change', this._handleAppStateChange);
@@ -109,14 +117,28 @@ class App extends React.Component {
     // testing modal
 
     // creating db when app starts
-    dispatchDbCall(() => createDb());
     dispatchDbCall(() =>
-      getDefSort((defSort) => this.props.dispatch(updateSettings(defSort)))
+      createDb(() =>
+        dispatchDbCall(() =>
+          getSettings((settings) =>
+            this.props.dispatch(
+              updateSettings(settings.defSort, settings.homePage)
+            )
+          )
+        )
+      )
     );
-    // reseting nav routes, mainly used for development purposes
+
+    if (this.props.settings.homePage) {
+      this.setInitSelDay(true);
+      // setTimeout(() => this.setInitSelDay(true), 3000);
+      this.props.dispatch(toggleLoading(false));
+      this.props.dispatch(setScreen(this.props.settings.homePage));
+      this.currComponent();
+      this.setScreenTitle(this.props.settings.homePage);
+    }
 
     // testModal(this.props.dispatch);
-    this.props.dispatch(initScreen());
   }
 
   componentDidUpdate(prevProps) {
@@ -129,19 +151,32 @@ class App extends React.Component {
     if (!isEqual(selDay, prevProps.selDay)) {
       this.setScreenTitle();
     }
+
+    if (
+      this.props.settings.homePage !== prevProps.settings.homePage &&
+      !prevProps.settings.homePage
+    ) {
+      this.setInitSelDay(true);
+      // setTimeout(() => this.setInitSelDay(true), 3000);
+      this.props.dispatch(toggleLoading(false));
+      this.props.dispatch(setScreen(this.props.settings.homePage));
+    }
   }
 
   componentWillUnmount() {
     Dimensions.removeEventListener('change', this.changeDimensions);
     AppState.removeEventListener('change', this._handleAppStateChange);
     this.backHandler.remove();
+    this.mounted = false;
   }
 
-  setScreenTitle() {
+  setScreenTitle(custScreenKey) {
     const { routeItem, selDay, currScreen } = this.props;
 
-    if (currScreen.screenKey === DAY) {
-      formNamedDate(selDay.year, selDay.month, selDay.day)
+    const scrKey = custScreenKey || currScreen.screenKey;
+
+    if (scrKey === DAY) {
+      formNamedDate(selDay.year, selDay.month, selDay.day, true)
         .then((dateName) => {
           this.setState({ screenTitle: dateName });
         })
@@ -154,31 +189,41 @@ class App extends React.Component {
     }
   }
 
-  setInitSelDay(gDays) {
-    if (gDays) {
+  async setInitSelDay(gDays) {
+    if (gDays && this.mounted) {
       const date = new Date();
-      const day = date.getDate();
-      const month = date.getMonth();
-      const year = date.getFullYear();
+      let day = date.getDate();
+      let month = date.getMonth();
+      let year = date.getFullYear();
+
+      if (this.props.initDate) {
+        day = this.props.initDate.day;
+        month = this.props.initDate.month;
+        year = this.props.initDate.year;
+      }
 
       genDays({ day, month, year }, false, this.props.dispatch);
       this.setState({
         initMonth: month,
         initYear: year,
       });
+      if (this.props.initDate) {
+        this.props.dispatch(setInitDate(null));
+      }
     }
   }
 
   _handleAppStateChange(nextAppState) {
     if (nextAppState === 'active') {
+      console.log('app active');
       // TODO: check if this does not fuk up
       // when you've removed the initial screen function
       // and set up the default homescreen
       // try changing app states when the following months
       // day has been selected and see if nothign fuks up in
       // task preview and calendar comp
-      this.props.dispatch(initScreen());
-      this.setInitSelDay(true);
+      // this.props.dispatch(initScreen());
+      // this.setInitSelDay(true);
     }
   }
 
@@ -190,9 +235,14 @@ class App extends React.Component {
     this.setState({
       showMenu: false,
     });
-    this.setInitSelDay(title === DAY || title === MONTH);
+
+    const loadInit = title === DAY || title === MONTH;
+    this.setInitSelDay(loadInit);
     this.props.dispatch(remBackAction('closeMenu'));
-    this.props.dispatch(switchScreen(title));
+    this.props.dispatch(switchScreen(title, false, false, { loadInit }));
+    if (title === MONTH) {
+      this.props.dispatch(clearExtraInfo(MONTH));
+    }
   };
 
   handleBackPress = () => {
@@ -213,11 +263,6 @@ class App extends React.Component {
 
   currComponent() {
     switch (this.props.currScreen.screenKey) {
-      case HOME_TITLE:
-        this.setState({
-          currCompArr: [{ component: <Home key="0" />, title: HOME_TITLE }],
-        });
-        break;
       case TEST_TITLE:
         this.setState({
           currCompArr: [
@@ -314,7 +359,7 @@ class App extends React.Component {
       }
       default:
         this.setState({
-          currCompArr: [{ component: <Home />, title: HOME_TITLE }],
+          currCompArr: [{ component: <View key="0" />, title: '' }],
         });
     }
   }
@@ -406,12 +451,13 @@ class App extends React.Component {
             {this.state.currCompArr.map((screenComp) => screenComp.component)}
           </View>
         </AnimContainer>
-        {[MONTH, DAY].includes(currScreen.screenKey) && (
-          <FloatingButton
-            testID={appIds.floatAdd}
-            onPress={() => this.props.dispatch(switchScreen(TASK))}
-          />
-        )}
+        {!this.props.routeItem.extraInfo.move &&
+          [MONTH, DAY].includes(currScreen.screenKey) && (
+            <FloatingButton
+              testID={appIds.floatAdd}
+              onPress={() => this.props.dispatch(switchScreen(TASK))}
+            />
+          )}
       </ImageBackground>
     );
   }
@@ -427,6 +473,8 @@ const mapStateToProps = (state) => ({
   ddData: state.appDD.ddData,
   selDay: state.selDay,
   appRngCode: state.appRngCode,
+  settings: state.settings,
+  initDate: state.initDate,
 });
 
 const mapDispatchToProps = (dispatch) => ({

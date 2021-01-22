@@ -2,23 +2,34 @@ import React from 'react';
 import { View, AppState } from 'react-native';
 /* styles */
 import { month, horMonth } from './style';
+import { darkBasic } from '../../styles/theme';
 /* components */
 import { Calendar } from '../../components/Calendar';
 import { IconButton } from '../../components/IconButton';
 import TaskPreview from '../../components/TaskPreview';
 import DropDownList from '../../components/DropDownList';
+import { GenButton } from '../../components/GenButton';
 /* redux */
 import { connect } from 'react-redux';
+import {
+  clearExtraInfo,
+  remBackAction,
+  switchScreen,
+} from '../../redux/general/actions';
 /* utils */
+import findLast from 'lodash/findLast';
 import isEqual from 'lodash/isEqual';
 /* consts */
 import {
   titleBarHeight,
   searchInpHeight,
   rndTxtInputOffset,
+  MONTH,
 } from '../../consts/generalConsts';
 import { setSelMonth, setSelYear } from '../../redux/dates/actions';
 import { genDays } from '../../utils/dateUtils';
+/* database */
+import { updateItemDate } from '../../database/crud';
 
 class Month extends React.Component {
   constructor(props) {
@@ -43,6 +54,8 @@ class Month extends React.Component {
     this.onYItemPress = this.onYItemPress.bind(this);
     this.orienChanged = this.orienChanged.bind(this);
     this.setInputXY = this.setInputXY.bind(this);
+    this.confirmMove = this.confirmMove.bind(this);
+    this.cancelMove = this.cancelMove.bind(this);
   }
 
   componentDidMount() {
@@ -62,12 +75,21 @@ class Month extends React.Component {
   }
 
   componentWillUnmount() {
+    this.props.dispatch(clearExtraInfo(MONTH));
     AppState.removeEventListener('change', this._handleAppStateChange);
   }
 
   _handleAppStateChange = (nextAppState) => {
-    if (nextAppState === 'active') {
-      this.setCurrMY();
+    if (nextAppState === 'active' && this.props.today) {
+      const date = new Date();
+      const { day, month: monthz, year } = this.props.today;
+      if (
+        date.getDate() !== day ||
+        date.getMonth() !== monthz ||
+        year !== date.getFullYear()
+      ) {
+        this.setCurrMY();
+      }
     }
   };
 
@@ -193,6 +215,26 @@ class Month extends React.Component {
     });
   }
 
+  confirmMove() {
+    const { year, month: monthz, day } = this.props.selDay;
+    updateItemDate(
+      this.props.extraInfo.moveItem,
+      year,
+      monthz,
+      day,
+      this.cancelMove
+    );
+  }
+
+  cancelMove() {
+    this.props.dispatch(remBackAction('cancel_move'));
+    if (this.props.extraInfo.mViaMonth) {
+      this.props.dispatch(clearExtraInfo(MONTH));
+    } else {
+      this.props.dispatch(switchScreen(false, true));
+    }
+  }
+
   render() {
     const monthStyle = this.state.portrait ? month : horMonth;
 
@@ -200,16 +242,26 @@ class Month extends React.Component {
       this.props.mainMonth === this.props.initMonth &&
       this.props.mainYear === this.props.initYear;
 
-    const prevContainer =
+    const { move, moveItem, loadInit } = this.props.extraInfo;
+
+    let prevContainer =
       this.state.portrait && !currMonYear
         ? {
             ...monthStyle.prevContainer,
-            flex: 18,
+            flex: move ? 18 : 23,
           }
         : {
             ...monthStyle.prevContainer,
-            flex: 20,
+            flex: move ? 20 : 25,
           };
+
+    const calInContainer =
+      move && !this.state.portrait
+        ? {
+            height: '85%',
+            marginTop: 'auto',
+          }
+        : {};
 
     return (
       <View style={monthStyle.container}>
@@ -227,17 +279,50 @@ class Month extends React.Component {
           </View>
         )}
         <View style={monthStyle.calContainer}>
-          <Calendar
-            resetMon={this.state.resetMon}
-            resetYea={this.state.resetYea}
-            toggleMonRes={this.toggleMonRes}
-            toggleYeaRes={this.toggleYeaRes}
-            setMDropDown={this.setMDropDown}
-            setYDropDown={this.setYDropDown}
-            portrait={this.state.portrait}
-            setInputXY={this.setInputXY}
-          />
+          {!this.state.portrait && move && (
+            <View style={monthStyle.movCont}>
+              <GenButton
+                color={darkBasic.buttTypes.nav}
+                onPress={() => this.confirmMove()}
+                text="Move"
+              />
+              <GenButton
+                color={darkBasic.buttTypes.info}
+                onPress={() => this.cancelMove()}
+                text="Cancel"
+              />
+            </View>
+          )}
+          <View style={calInContainer}>
+            <Calendar
+              move={move}
+              resetMon={this.state.resetMon}
+              resetYea={this.state.resetYea}
+              toggleMonRes={this.toggleMonRes}
+              toggleYeaRes={this.toggleYeaRes}
+              setMDropDown={this.setMDropDown}
+              setYDropDown={this.setYDropDown}
+              portrait={this.state.portrait}
+              setInputXY={this.setInputXY}
+            />
+          </View>
         </View>
+        {this.state.portrait && move && (
+          <View style={monthStyle.movCont}>
+            <GenButton
+              custStyle={month.movBut}
+              color={darkBasic.buttTypes.nav}
+              onPress={() => this.confirmMove()}
+              text="Move"
+            />
+            <GenButton
+              custStyle={month.movBut}
+              color={darkBasic.buttTypes.info}
+              onPress={() => this.cancelMove()}
+              text="Cancel"
+            />
+          </View>
+        )}
         <View style={prevContainer}>
           {!this.state.portrait && !currMonYear && (
             <View style={monthStyle.butContainer}>
@@ -253,6 +338,8 @@ class Month extends React.Component {
           )}
           <View style={monthStyle.prevTaskCont}>
             <TaskPreview
+              loadInit={loadInit}
+              moveItem={moveItem}
               portrait={this.state.portrait}
               selDay={this.props.selDay}
             />
@@ -285,12 +372,17 @@ class Month extends React.Component {
   }
 }
 
-const mapStateToProps = (state) => ({
-  screenOrient: state.screenOrient,
-  selDay: state.selDay,
-  mainMonth: state.calDays.mainMonth,
-  mainYear: state.calDays.mainYear,
-});
+const mapStateToProps = (state) => {
+  const navItem = findLast(state.currScreen.navRoute, ['key', MONTH]);
+  return {
+    screenOrient: state.screenOrient,
+    selDay: state.selDay,
+    mainMonth: state.calDays.mainMonth,
+    mainYear: state.calDays.mainYear,
+    today: state.calDays.today,
+    extraInfo: navItem ? navItem.extraInfo : {},
+  };
+};
 
 const mapDispatchToProps = (dispatch) => ({
   dispatch,

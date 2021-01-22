@@ -39,6 +39,7 @@ const selDay = (state = selDayState, action) => {
 const calDaysInit = {
   data: false,
   change: null,
+  today: null,
   mainMonth: null,
   mainYear: null,
 };
@@ -46,6 +47,7 @@ const calDaysInit = {
 const calDays = (state = calDaysInit, action) => {
   if (action.type === actions.SET_CAL_DAYS) {
     return {
+      today: action.items.today || state.today,
       data: action.items.calDays,
       // so we use this to check for changes in generated calendar days
       // we use a randomly generated string instead of checking actual
@@ -58,6 +60,7 @@ const calDays = (state = calDaysInit, action) => {
     const date = new Date();
     const gen = genCalDays(date.getMonth(), date.getFullYear());
     return {
+      today: gen.initToday,
       data: gen.items,
       // so we use this to check for changes in generated calendar days
       // we use a randomly generated string instead of checking actual

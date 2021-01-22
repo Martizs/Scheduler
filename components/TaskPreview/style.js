@@ -1,6 +1,6 @@
-import {StyleSheet} from 'react-native';
+import { StyleSheet } from 'react-native';
 /* styles */
-import {interIconSize, darkThTextColor} from '../../styles/theme';
+import { interIconSize, darkThTextColor } from '../../styles/theme';
 
 export const taskPrev = StyleSheet.create({
   container: {

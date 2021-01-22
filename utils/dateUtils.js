@@ -23,13 +23,14 @@ export function addZero(item) {
 
 // helper function to form named date
 // 'Today' 'this Wednesday' etc.
-export function formNamedDate(year, month, day) {
+export function formNamedDate(year, month, day, alterName) {
   return new Promise((resolve, reject) => {
     if (year !== undefined && month !== undefined && day !== undefined) {
       Database.formatNamedDate(
         addZero(year),
         addZero(month + 1),
         addZero(day),
+        !!alterName,
         (dateStr) => {
           resolve(dateStr);
         },
@@ -51,6 +52,8 @@ export function genCalDays(mon, yea, forCurrMonth) {
 
   let month = mon;
   let year = yea;
+
+  let initToday = null;
 
   let keyIncr = 0;
 
@@ -112,18 +115,20 @@ export function genCalDays(mon, yea, forCurrMonth) {
 
   // here we push the current months days
   for (let i = 1; i < lastMonthDay + 1; i++) {
+    const isCurrent = currMonth && currYear;
     const item = {
       key: keyIncr + '',
       title: i + '',
       opaque: false,
-      today: i === today && currMonth && currYear,
+      today: i === today && isCurrent,
       day: i,
       year,
       month,
     };
-    if (currMonth) {
+    if (isCurrent) {
       if (i === today) {
         initDay = item;
+        initToday = item;
       }
     } else if (i === 1) {
       initDay = item;
@@ -159,19 +164,21 @@ export function genCalDays(mon, yea, forCurrMonth) {
     keyIncr += 1;
   }
 
-  return { items, initDay };
+  return { items, initDay, initToday };
 }
 
 export function genDays(selDay, daySwitch, dispatch) {
   const gen = genCalDays(selDay.month, selDay.year);
-  dispatch(setCalDays(gen.items, selDay.month, selDay.year));
+  dispatch(setCalDays(gen.items, selDay.month, selDay.year, gen.initToday));
   dispatchDbCall(() =>
     createRep(selDay.year, selDay.month, () => {
       // so here we want to set a new selected day
       // ONLY if there's no day switching occuring
       // meaning if just the month has been changed
       // OR component has mounted
-      if (!daySwitch) {
+      if (selDay.day) {
+        dispatch(setSelDay(selDay));
+      } else if (!daySwitch) {
         // These get set as number values
         dispatch(setSelDay(gen.initDay));
       }

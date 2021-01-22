@@ -18,12 +18,22 @@ export function cancelTime(reqCode, callBack) {
   );
 }
 
-export function openApp() {
-  ScheduleTime.openApp();
+export function testLogging() {
+  ScheduleTime.testLogging(0, 6, (res) => {
+    console.log('res', res);
+  });
+}
+
+export function showInApp() {
+  ScheduleTime.showInApp();
 }
 
 export function stopMedia() {
   ScheduleTime.stopMedia();
+}
+
+export function cancelNotif(mainTimeId) {
+  ScheduleTime.cancelNotif(mainTimeId);
 }
 
 export function isMediaPlaying(successCallback, errCallback) {

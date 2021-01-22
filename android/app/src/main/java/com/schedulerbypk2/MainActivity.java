@@ -46,7 +46,12 @@ public class MainActivity extends ReactActivity {
       int importance = NotificationManager.IMPORTANCE_HIGH;
       NotificationChannel channel = new NotificationChannel(CHANNEL_ID, "com.schedulerbypk2", importance);
       NotificationManager notificationManager = getSystemService(NotificationManager.class);
-      notificationManager.createNotificationChannel(channel);
+      if(notificationManager != null){
+        notificationManager.createNotificationChannel(channel);
+      } else {
+        // TODO: add in error logs here, cause notifManager might be null for some
+        // unknown reason
+      }
     }
   }
 
@@ -82,10 +87,13 @@ public class MainActivity extends ReactActivity {
     protected void onCreate(Bundle savedInstanceState) {
       // bundle is where we put our alarmID with launchIntent.putExtra
       Bundle bundle = mActivity.getIntent().getExtras();
-      if (bundle != null && bundle.containsKey(RNG_CODE) && bundle.containsKey(MAIN_TIME_ID)) {
+      if (bundle != null && bundle.containsKey(MAIN_TIME_ID)) {
         mInitialProps = new Bundle();
-        // put any initialProps here
-        mInitialProps.putInt(RNG_CODE, bundle.getInt(RNG_CODE));
+        
+        if(bundle.containsKey(RNG_CODE)){
+          mInitialProps.putInt(RNG_CODE, bundle.getInt(RNG_CODE));
+        }
+        
         mInitialProps.putInt(MAIN_TIME_ID, bundle.getInt(MAIN_TIME_ID));
 
         if(bundle.containsKey(ERROR)){

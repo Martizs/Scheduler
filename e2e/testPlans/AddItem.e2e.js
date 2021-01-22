@@ -15,7 +15,7 @@ import { addZeroT, genFutTime } from './../testCases/utils/general';
 /* consts */
 import { actMenIds } from '../../screens/ActionMenu/testIds';
 import { taskData } from '../testCases/consts/task';
-import { remPrevIds } from '../../screens/Task/components/RemPrev/testIds';
+import { remPrevIds } from '../../components/RemPrev/testIds';
 import { tItemIds } from '../../components/TaskItem/testIds';
 
 describe('Create rep', () => {

@@ -142,7 +142,7 @@ interface Utils {
     String[] weekDays = {"Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"};
 
     // NOTE month needs to be passed in as is
-    public static String formatNamedDate(String year, String month, String day, boolean tommorow) {
+    public static String formatNamedDate(String year, String month, String day, boolean tommorow, boolean alterName) {
 
         Calendar calDateTocheck = Calendar.getInstance();
         calDateTocheck.setFirstDayOfWeek(Calendar.MONDAY);
@@ -164,16 +164,26 @@ interface Utils {
             calDateTocheck.get(Calendar.YEAR) == currCalDate.get(Calendar.YEAR)) {
 
             if (calDateTocheck.get(Calendar.DAY_OF_MONTH) == currCalDate.get(Calendar.DAY_OF_MONTH)) {
-                return "Today";
+                String dateName = "Today";
+                if(alterName){
+                    dateName = dateName + "/" + weekDays[calDateTocheck.get(Calendar.DAY_OF_WEEK) - 1];
+                }
+                return dateName;
             }
 
-            if(tommorow){
+            if(tommorow || alterName){
 
                 Calendar tomCalDate = Calendar.getInstance();
                 tomCalDate.add(Calendar.DAY_OF_MONTH, 1);
 
                 if (calDateTocheck.get(Calendar.DAY_OF_MONTH) == tomCalDate.get(Calendar.DAY_OF_MONTH)) {
-                    return "Tomorrow";
+                    String dateName = "Tomorrow";
+
+                    if(alterName){
+                        dateName = dateName + "/" + weekDays[calDateTocheck.get(Calendar.DAY_OF_WEEK) - 1];
+                    }
+                    
+                    return dateName;
                 }
             }
 
@@ -196,14 +206,18 @@ interface Utils {
         return year + " " + calDateTocheck.getDisplayName(Calendar.MONTH, Calendar.LONG, new Locale("US")) + " " + day;
     }
 
+    public static String formatNamedDate(String year, String month, String day, boolean tommorow) {
+        return formatNamedDate(year, month, day, tommorow, false);
+    }
+
     public static String formatNamedDate(String year, String month, String day) {
-        return formatNamedDate(year, month, day, false);
+        return formatNamedDate(year, month, day, false, false);
     }
 
     public static void stopMedia(Context context){
         Vibrator vibe = (Vibrator) context.getSystemService(Context.VIBRATOR_SERVICE);
 
-        if(vibe.hasVibrator()){
+        if(vibe != null && vibe.hasVibrator()){
             vibe.cancel();
         }
 
@@ -226,7 +240,8 @@ interface Utils {
 
         // alarm action set up
         Intent alarmIntent = context.getPackageManager().getLaunchIntentForPackage(packageName);
-        alarmIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
+        // alarmIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
+        alarmIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
         PendingIntent alarmScreen = PendingIntent.getActivity(context, mainTimeId, alarmIntent, PendingIntent.FLAG_ONE_SHOT | PendingIntent.FLAG_NO_CREATE);
 
         if(alarmScreen != null){

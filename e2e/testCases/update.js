@@ -2,7 +2,7 @@ import { containTxt, hasTxt, pressItem, scrollTo } from './testSteps/general';
 import { editTaskNav, navigate } from './nav';
 import { remFill, taskFill } from './fill';
 /* consts */
-import { remPrevIds } from '../../screens/Task/components/RemPrev/testIds';
+import { remPrevIds } from '../../components/RemPrev/testIds';
 import { titBarIds } from './../../components/TitleBar/testIds';
 import { remIds } from '../../screens/Reminder/testIds';
 import { taskIds } from '../../screens/Task/testIds';

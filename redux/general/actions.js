@@ -10,21 +10,24 @@ export function switchScreen(key, back, title, extraInfo) {
   };
 }
 
+export const SET_SCREEN = 'SET_SCREEN';
+// when backing title should be null
+// #bestPractice
+export function setScreen(key) {
+  return {
+    type: SET_SCREEN,
+    key,
+  };
+}
+
 export const ADD_EXTRA_INFO = 'ADD_EXTRA_INFO';
 export function addExtraInfo(key, extraInfo) {
   return { type: ADD_EXTRA_INFO, data: { key, extraInfo } };
 }
 
-export const RESET_NAV_ROUTES = 'RESET_NAV_ROUTES';
-// when backing title should be null
-// #bestPractice
-export function resetNavRoutes() {
-  return { type: RESET_NAV_ROUTES };
-}
-
-export const INIT_SCREEN = 'INIT_SCREEN';
-export function initScreen() {
-  return { type: INIT_SCREEN };
+export const CLEAR_EXTRA_INFO = 'CLEAR_EXTRA_INFO';
+export function clearExtraInfo(key) {
+  return { type: CLEAR_EXTRA_INFO, key };
 }
 
 export const SET_FLOAT_FUNC = 'SET_FLOAT_FUNC';
@@ -69,10 +72,22 @@ export function toggleModal(title, content, actions) {
 
 /* settings */
 
+export const UPDATE_SORT = 'UPDATE_SORT';
+
+export function updatePropSort(defSort) {
+  return { type: UPDATE_SORT, defSort };
+}
+
+export const UPDATE_HOME = 'UPDATE_HOME';
+
+export function updateHome(homePage) {
+  return { type: UPDATE_HOME, homePage };
+}
+
 export const UPDATE_SETTINGS = 'UPDATE_SETTINGS';
 
-export function updateSettings(defSort) {
-  return { type: UPDATE_SETTINGS, defSort };
+export function updateSettings(defSort, homePage) {
+  return { type: UPDATE_SETTINGS, settings: { defSort, homePage } };
 }
 
 /* appDD */
@@ -124,5 +139,24 @@ export function setAppRngCode(appRngCode) {
   return {
     type: SET_APP_REQ_CODE,
     appRngCode,
+  };
+}
+
+export const SET_INIT_ITEM_ID = 'SET_INIT_ITEM_ID';
+
+export function setInitItemId(mainTimeId) {
+  return {
+    type: SET_INIT_ITEM_ID,
+    mainTimeId,
+  };
+}
+
+export const SET_INIT_DATE = 'SET_INIT_DATE';
+
+// @date - an object like { year, month, day }
+export function setInitDate(date) {
+  return {
+    type: SET_INIT_DATE,
+    date,
   };
 }

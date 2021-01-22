@@ -6,12 +6,19 @@ import com.facebook.react.bridge.ReactApplicationContext;
 import com.facebook.react.bridge.ReactContextBaseJavaModule;
 import com.facebook.react.bridge.ReactMethod;
 import com.facebook.react.bridge.Callback;
+import com.facebook.react.bridge.WritableMap;
+import com.facebook.react.bridge.Arguments;
 
 // java/android imports
+import androidx.core.app.NotificationManagerCompat;
 import android.app.AlarmManager;
 import android.content.Intent;
 import android.app.PendingIntent;
 import android.content.Context;
+import java.util.Calendar;
+import java.text.SimpleDateFormat; 
+import 	java.util.Locale;
+import 	java.util.TimeZone;
 
 // general imports
 import java.util.Map;
@@ -60,7 +67,7 @@ public class ScheduleTime extends ReactContextBaseJavaModule {
     @ReactMethod
     public void cancelSetTime(Integer reqCode, Callback successCallback, Callback errorCallback) {
         String resp = manageCancelTime(reqCode, reactContext);
-        if(resp.indexOf("error") != -1){
+        if(resp.contains("error")){
             errorCallback.invoke(resp);
         } else {
             successCallback.invoke(resp);
@@ -68,8 +75,34 @@ public class ScheduleTime extends ReactContextBaseJavaModule {
     }
 
     @ReactMethod
-    public void testLogging() {
-        Log.i("testLogging", "successfull");
+    public void testLogging(int firstAdd, int secondAdd, Callback successCallback) {
+        SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm");
+        Calendar testDate = Calendar.getInstance();
+        testDate.setFirstDayOfWeek(Calendar.MONDAY);
+        WritableMap writMap = Arguments.createMap();
+
+        testDate.set(Calendar.DAY_OF_WEEK, Calendar.MONDAY);
+        writMap.putInt("used week number with date one", firstAdd);
+        writMap.putString("date one", formatter.format(testDate.getTime()));
+        testDate.set(Calendar.DAY_OF_WEEK, Calendar.SUNDAY);
+        writMap.putInt("used week number with date two", secondAdd);
+        writMap.putString("date two", formatter.format(testDate.getTime()));
+        successCallback.invoke(writMap);
+        // Log.i("testLogging", "successfull");
+    }
+
+    // simply will cancel a current notification,
+    // mainly used for alarm screen which opened over locked screen
+    // so that a button press would also remove the notification from the background
+    @ReactMethod
+    public void cancelNotif(int mainTimeId) {
+        try{
+            NotificationManagerCompat notificationManager = NotificationManagerCompat.from(reactContext);
+                
+            notificationManager.cancel(mainTimeId);
+        } catch (Exception e) {
+            Utils.onError(reactContext, -1, -1, "cancelNotif Error" + e.getMessage());
+        }
     }
 
     // stops the media player from playing if it is already playing
@@ -106,7 +139,7 @@ public class ScheduleTime extends ReactContextBaseJavaModule {
 
 
     @ReactMethod
-    public void openApp() {
+    public void showInApp() {
         String packageName = reactContext.getApplicationContext().getPackageName();
         Intent launchIntent = reactContext.getPackageManager().getLaunchIntentForPackage(packageName);
 

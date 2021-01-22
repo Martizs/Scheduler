@@ -10,6 +10,7 @@ export const GenButton = (props) => (
     style={{
       ...genBut.but,
       borderColor: props.color,
+      ...props.custStyle,
     }}
     onPress={props.onPress}
   >

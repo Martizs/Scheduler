@@ -18,7 +18,7 @@ import {
 } from './testSteps/general';
 /* utils */
 import { getTitText } from './utils/general';
-import { remPrevIds } from '../../screens/Task/components/RemPrev/testIds';
+import { remPrevIds } from '../../components/RemPrev/testIds';
 
 export async function remTask(navId, taskTitle, rep, viaOpts, lPress) {
   if (navId) {

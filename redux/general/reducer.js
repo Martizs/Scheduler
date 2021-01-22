@@ -1,29 +1,17 @@
 /* actions */
 import * as actions from './actions';
 /* consts */
-import { HOME_TITLE, screenTitles } from '../../consts/generalConsts';
+import { screenTitles } from '../../consts/generalConsts';
 import { sortItems } from '../../components/DayTaskList/const';
 /* utils */
 import findIndex from 'lodash/findIndex';
-import cloneDeep from 'lodash/cloneDeep';
-
-const initScState = {
-  screenKey: HOME_TITLE,
-  floatFunc: null,
-  navRoute: [
-    { key: HOME_TITLE, extraInfo: {}, title: screenTitles[HOME_TITLE] },
-  ],
-  // current route index
-  routeInd: 0,
-};
+import findLastIndex from 'lodash/findLastIndex';
 
 // current screen reducer
 const currScState = {
-  screenKey: HOME_TITLE,
+  screenKey: 'empty',
   floatFunc: null,
-  navRoute: [
-    { key: HOME_TITLE, extraInfo: {}, title: screenTitles[HOME_TITLE] },
-  ],
+  navRoute: [{ key: 'empty', extraInfo: {}, title: '' }],
   // current route index
   routeInd: 0,
 };
@@ -57,7 +45,7 @@ export const currScreen = (state = currScState, action) => {
     }
     case actions.ADD_EXTRA_INFO: {
       const navRoute = state.navRoute;
-      const routInd = findIndex(navRoute, ['key', action.data.key]);
+      const routInd = findLastIndex(navRoute, ['key', action.data.key]);
       if (routInd !== -1) {
         navRoute[routInd].extraInfo = {
           ...navRoute[routInd].extraInfo,
@@ -69,32 +57,32 @@ export const currScreen = (state = currScState, action) => {
         navRoute,
       };
     }
+    case actions.CLEAR_EXTRA_INFO: {
+      const navRoute = state.navRoute;
+      const routInd = findLastIndex(navRoute, ['key', action.key]);
+      if (routInd !== -1) {
+        navRoute[routInd].extraInfo = {};
+      }
+      return {
+        ...state,
+        navRoute,
+      };
+    }
     case actions.SET_FLOAT_FUNC:
       return {
         ...state,
         floatFunc: action.func,
       };
-    case actions.RESET_NAV_ROUTES: {
-      let navRoute = state.navRoute;
-      const defItem = {
-        key: HOME_TITLE,
-        extraInfo: {},
-        title: screenTitles[HOME_TITLE],
-      };
-      if (navRoute[navRoute.length - 1].key === HOME_TITLE) {
-        navRoute = [defItem];
-      } else {
-        navRoute = [defItem, navRoute[navRoute.length - 1]];
-      }
-
+    case actions.SET_SCREEN:
       return {
-        ...state,
-        routeInd: navRoute.length - 1,
-        navRoute,
+        screenKey: action.key,
+        floatFunc: null,
+        navRoute: [
+          { key: action.key, extraInfo: {}, title: screenTitles[action.key] },
+        ],
+        // current route index
+        routeInd: 0,
       };
-    }
-    case actions.INIT_SCREEN:
-      return cloneDeep(initScState);
     default:
       return state;
   }
@@ -193,13 +181,27 @@ const modal = (state = modState, action) => {
 // settings
 const settingsState = {
   defSort: sortItems[0].key,
+  homePage: false,
 };
 
 const settings = (state = settingsState, action) => {
   switch (action.type) {
+    case actions.UPDATE_SORT: {
+      return {
+        ...state,
+        defSort: action.defSort,
+      };
+    }
+    case actions.UPDATE_HOME: {
+      return {
+        ...state,
+        homePage: action.homePage,
+      };
+    }
     case actions.UPDATE_SETTINGS: {
       return {
-        defSort: action.defSort,
+        defSort: action.settings.defSort,
+        homePage: action.settings.homePage,
       };
     }
     default:
@@ -267,6 +269,31 @@ const appRngCode = (state = appRngCodeState, action) => {
   }
 };
 
+// show in app
+const initItemIdState = null;
+
+const initItemId = (state = initItemIdState, action) => {
+  switch (action.type) {
+    case actions.SET_INIT_ITEM_ID: {
+      return action.mainTimeId;
+    }
+    default:
+      return state;
+  }
+};
+
+const initDateState = null;
+
+const initDate = (state = initDateState, action) => {
+  switch (action.type) {
+    case actions.SET_INIT_DATE: {
+      return action.date;
+    }
+    default:
+      return state;
+  }
+};
+
 export default {
   loadingScreen,
   currScreen,
@@ -276,4 +303,6 @@ export default {
   settings,
   appDD,
   appRngCode,
+  initItemId,
+  initDate,
 };

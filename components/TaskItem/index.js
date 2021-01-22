@@ -6,15 +6,18 @@ import { taskItem } from './style';
 /* components */
 import CheckBox from '@react-native-community/checkbox';
 import Icon from 'react-native-vector-icons/MaterialIcons';
+import { RemPrev } from '../RemPrev';
 /* consts */
 import { tItemIds } from './testIds';
+/* redux */
+import { connect } from 'react-redux';
 
 class TaskItem extends React.Component {
   constructor(props) {
     super();
 
     this.state = {
-      details: false,
+      details: !!props.initItemId && props.initItemId + '' === props.item.key,
     };
 
     this.checkBounds = this.checkBounds.bind(this);
@@ -22,16 +25,20 @@ class TaskItem extends React.Component {
     this.openMenu = this.openMenu.bind(this);
   }
 
-  async checkBounds() {
-    this.itemRef &&
-      this.itemRef.measure((fx, fy, width, height, px, py) => {
-        if (py + height > this.props.windHeight) {
-          this.props.onDetOut();
-        }
-      });
+  async checkBounds(scroll) {
+    if (scroll) {
+      this.props.onDetOut();
+    } else {
+      this.itemRef &&
+        this.itemRef.measure((fx, fy, width, height, px, py) => {
+          if (py + height > this.props.windHeight) {
+            this.props.onDetOut();
+          }
+        });
+    }
   }
 
-  setDetails(details) {
+  setDetails(details, scroll) {
     if (this.props.noDetail) {
       if (this.props.onItemPress) {
         this.props.onItemPress();
@@ -41,7 +48,7 @@ class TaskItem extends React.Component {
         {
           details,
         },
-        () => setTimeout(this.checkBounds, 10)
+        () => setTimeout(async () => this.checkBounds(scroll), 10)
       );
     }
   }
@@ -56,15 +63,27 @@ class TaskItem extends React.Component {
   render() {
     const { details } = this.state;
 
-    const { item, done, notTask, noCheckBox, noTime } = this.props;
+    const {
+      item,
+      done,
+      notTask,
+      noCheckBox,
+      noTime,
+      highlight,
+      noOptions,
+    } = this.props;
 
     const textStyle =
       done && !notTask
         ? {
             textDecorationLine: 'line-through',
-            color: darkBasic.placeHolderColor,
+            color: highlight
+              ? darkBasic.highLightHolderCol
+              : darkBasic.placeHolderColor,
           }
-        : {};
+        : {
+            color: highlight ? darkBasic.highLight : darkBasic.textColor,
+          };
 
     const time =
       !noTime &&
@@ -75,7 +94,7 @@ class TaskItem extends React.Component {
         ? `${item.hours}:${item.minutes}`
         : false;
 
-    const optButStyle = this.props.noOptions
+    const optButStyle = noOptions
       ? {
           ...taskItem.optBut,
           opacity: 0,
@@ -149,7 +168,7 @@ class TaskItem extends React.Component {
           <TouchableOpacity
             testID={`${tItemIds.optBut}-${item.title}`}
             style={optButStyle}
-            disabled={this.props.noOptions}
+            disabled={noOptions}
             ref={(ref) => {
               this.optionsRef = ref;
             }}
@@ -167,18 +186,33 @@ class TaskItem extends React.Component {
           </TouchableOpacity>
         </View>
         {details && (
-          <View style={taskItem.expandItem}>
+          <TouchableOpacity
+            onPress={this.props.editTask}
+            disabled={noOptions}
+            style={taskItem.expandItem}
+          >
+            {!!item.reminders?.length && (
+              <RemPrev
+                justPreview
+                reminders={item.reminders}
+                editTask={this.props.editTask}
+              />
+            )}
             <View style={taskItem.descWrapper}>
               <Text style={taskItem.detTitle}>{item.title}</Text>
               <Text style={taskItem.descText}>
                 {item.description || 'No description'}
               </Text>
             </View>
-          </View>
+          </TouchableOpacity>
         )}
       </View>
     );
   }
 }
 
-export default TaskItem;
+const mapDispatchToProps = (dispatch) => ({
+  dispatch,
+});
+
+export default connect(mapDispatchToProps)(TaskItem);

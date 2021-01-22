@@ -35,4 +35,4 @@ export const remTFields = {
   test_check: 'test_check',
 };
 export const setTable = 'settings';
-export const setTFields = { defSort: 'defSort' };
+export const setTFields = { defSort: 'defSort', homePage: 'homePage' };

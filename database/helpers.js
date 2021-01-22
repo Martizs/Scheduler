@@ -1,10 +1,16 @@
 import { db } from './index';
 import Database from '../Database';
 /* utils */
+import moment from 'moment';
 import find from 'lodash/find';
 import isEqual from 'lodash/isEqual';
 import { addZero } from '../utils/dateUtils';
-import { repTypeHours, repTypeMins } from '../consts/dateConts';
+import {
+  repTypeHours,
+  repTypeMins,
+  repWeeklyKey,
+  wDays,
+} from '../consts/dateConts';
 
 // helper function that takes in moment js start & end dates
 // and creates date array according to the passed in repeatability
@@ -14,30 +20,72 @@ import { repTypeHours, repTypeMins } from '../consts/dateConts';
 // dates object, so we wouldn't need to reloop and reformat too much
 export function createRepArray(startDate, endDate, repeatability, extraRes) {
   const dates = [];
+  let repEndTime = null;
 
-  // IMPORTANT: we use do while here because we want
-  // the dates to be added at least once, for such
-  // edge cases where there's a rep task for every two years
-  // and no other tasks or app interaction is happening
-  // and the task also has a reminder set, so we want to make sure
-  // that they always get created, when the last rep end time has been
-  // exceeded
-  do {
-    // this is where the adding magic happens
-    dates.push({
-      year: startDate.year() + '',
-      month: addZero(startDate.month() + 1),
-      day: addZero(startDate.date()),
-      ...extraRes,
-    });
-    // this should happen at ze end
-    startDate.add(repeatability.number, repeatability.type);
-  } while (startDate.isBefore(endDate));
+  if (repeatability.type === repWeeklyKey) {
+    do {
+      // we add in one day here to the date cause
+      // moment js treats start of week as sunday,
+      // fucking retard formats left and right
+      const from_date = moment(startDate);
+      if (startDate.format('dddd') === wDays[6].title) {
+        // so if the currently selected day is sunday, we want it
+        // to be set to saturday, so that moment does not fuk up our
+        // start of week with its retarded association of Sunday as
+        // start of week.
+        from_date.subtract(1, 'days');
+      }
+      from_date.startOf('week');
+      from_date.add(1, 'days');
+      const to_date = moment(startDate);
+      to_date.endOf('week');
+      to_date.add(1, 'days');
 
-  const repEndTime = startDate.subtract(
-    repeatability.number,
-    repeatability.type
-  );
+      do {
+        if (repeatability.values.indexOf(from_date.format('dddd')) !== -1) {
+          // this is where the adding magic happens
+          dates.push({
+            year: from_date.year() + '',
+            month: addZero(from_date.month() + 1),
+            day: addZero(from_date.date()),
+            // value will be used for auto doning tasks
+            // which get set to be in the past by this rep creator
+            canDone: true,
+            ...extraRes,
+          });
+
+          // NOTE: weekly repeatabilities rep end time is always MONDAY
+          // is intended, less extra logic in createRep
+          repEndTime = from_date;
+        }
+
+        from_date.add(1, 'days');
+      } while (from_date.isSameOrBefore(to_date));
+
+      startDate.add(1, 'weeks');
+    } while (startDate.isBefore(endDate));
+  } else {
+    // IMPORTANT: we use do while here because we want
+    // the dates to be added at least once, for such
+    // edge cases where there's a rep task for every two years
+    // and no other tasks or app interaction is happening
+    // and the task also has a reminder set, so we want to make sure
+    // that they always get created, when the last rep end time has been
+    // exceeded
+    do {
+      // this is where the adding magic happens
+      dates.push({
+        year: startDate.year() + '',
+        month: addZero(startDate.month() + 1),
+        day: addZero(startDate.date()),
+        ...extraRes,
+      });
+      // this should happen at ze end
+      startDate.add(repeatability.number, repeatability.type);
+    } while (startDate.isBefore(endDate));
+  }
+
+  repEndTime = startDate.subtract(repeatability.number, repeatability.type);
 
   return {
     dates,

@@ -1,14 +1,17 @@
 import React from 'react';
-import {TouchableOpacity, Text, View, ImageBackground} from 'react-native';
-import {RFValue} from 'react-native-responsive-fontsize';
+import { TouchableOpacity, Text, View, ImageBackground } from 'react-native';
+import { RFValue } from 'react-native-responsive-fontsize';
 /* styles */
-import {textContainer, smallTextCont} from '../../../../styles/generalStyles';
-import {calTodayHighLight, calSelHighLight} from '../../../../styles/theme';
-import {calDay} from './style';
+import {
+  smallTextCont,
+  ultraSmTextCont,
+} from '../../../../styles/generalStyles';
+import { highLight, calSelHighLight } from '../../../../styles/theme';
+import { calDay } from './style';
 
 const taskBackground = require('../../../../icons/whitTaskBackground.png');
 
-export const CalDay = props => {
+export const CalDay = (props) => {
   let contStyle = calDay.container;
   let imgWrapper = calDay.imgWrapper;
 
@@ -30,7 +33,7 @@ export const CalDay = props => {
   if (props.today) {
     contStyle = {
       ...contStyle,
-      borderColor: calTodayHighLight,
+      borderColor: highLight,
       borderWidth: 2,
     };
   }
@@ -44,10 +47,10 @@ export const CalDay = props => {
     };
   }
 
-  let textStyle = textContainer.style;
+  let textStyle = smallTextCont.style;
 
   if (props.weekDay) {
-    textStyle = smallTextCont.style;
+    textStyle = { ...ultraSmTextCont.style };
     contStyle = {
       ...contStyle,
       borderLeftWidth: 0,
@@ -67,11 +70,13 @@ export const CalDay = props => {
       <TouchableOpacity
         style={calDay.butContainer}
         disabled={props.weekDay}
-        onPress={() => props.onPress()}>
+        onPress={() => props.onPress()}
+      >
         <ImageBackground
           style={imgWrapper}
           imageStyle={calDay.imgStyle}
-          source={imgSource}>
+          source={imgSource}
+        >
           <Text style={textStyle}>{props.item}</Text>
         </ImageBackground>
       </TouchableOpacity>
