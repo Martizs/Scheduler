@@ -35,6 +35,7 @@ export function createRepArray(startDate, endDate, repeatability, extraRes) {
         // start of week.
         from_date.subtract(1, 'days');
       }
+
       from_date.startOf('week');
       from_date.add(1, 'days');
       const to_date = moment(startDate);
@@ -85,7 +86,9 @@ export function createRepArray(startDate, endDate, repeatability, extraRes) {
     } while (startDate.isBefore(endDate));
   }
 
-  repEndTime = startDate.subtract(repeatability.number, repeatability.type);
+  if (repeatability.type !== repWeeklyKey) {
+    repEndTime = startDate.subtract(repeatability.number, repeatability.type);
+  }
 
   return {
     dates,

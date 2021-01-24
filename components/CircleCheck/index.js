@@ -22,7 +22,7 @@ export const CircleCheck = (props) => {
   };
 
   return (
-    <TouchableOpacity style={container} onPress={onCheck}>
+    <TouchableOpacity testID={props.testID} style={container} onPress={onCheck}>
       <Text style={wDayCheck.text}>{props.title}</Text>
     </TouchableOpacity>
   );

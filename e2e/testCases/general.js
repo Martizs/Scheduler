@@ -3,14 +3,14 @@
 
 import { hasTxt, pressItem, reload, waitTextToBe } from './testSteps/general';
 /* consts */
-import { homeIds } from './../../screens/home/testIds';
 import { nativeIds } from './../../screens/NativeTestScreen/testIds';
 import { notifTimeout } from './consts/general';
+import { titBarIds } from '../../components/TitleBar/testIds';
 
 // openApp
 export async function openApp() {
   await reload();
-  await hasTxt('Welcome to the homescreen', homeIds.homeTxt);
+  await hasTxt('Calendar', titBarIds.titText);
 }
 
 // dismisses notification via our work around

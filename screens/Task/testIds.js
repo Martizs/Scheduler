@@ -8,4 +8,5 @@ export const taskIds = {
   backBut: 'backBut',
   addRem: 'addRem',
   repToSing: 'repToSing',
+  clearTime: 'clearTime',
 };

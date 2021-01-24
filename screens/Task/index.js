@@ -767,6 +767,7 @@ class TaskScreen extends React.Component {
                 />
                 {this.state.selHour !== 'hours' && (
                   <TouchableOpacity
+                    testID={taskIds.clearTime}
                     style={task.clearBut}
                     onPress={this.clearTime}
                   >

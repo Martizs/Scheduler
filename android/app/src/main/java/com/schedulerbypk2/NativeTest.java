@@ -1,4 +1,4 @@
-package com.schedulerbypk2.debug;
+package com.schedulerbypk2;
 
 // bridge imports
 import com.facebook.react.bridge.NativeModule;

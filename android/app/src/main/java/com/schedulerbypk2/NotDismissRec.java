@@ -1,4 +1,4 @@
-package com.schedulerbypk2.debug;
+package com.schedulerbypk2;
 
 import android.content.BroadcastReceiver;
 import android.content.Intent;

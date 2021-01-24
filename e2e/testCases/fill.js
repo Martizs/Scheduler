@@ -105,7 +105,10 @@ export async function remFill(
   }
 
   if (testCheck) {
-    await pressItem(remIds.testCheck);
+    await pressItem(`${remIds.testCheck}-false`);
+    // we do this cause of stupid leftover input focus
+    // in task screen
+    await checkPress(`${remIds.testCheck}-true`, `${remIds.testCheck}-false`);
   }
 
   if (notif) {
@@ -134,7 +137,16 @@ export async function remFill(
 // and will press on the minutes
 // NOTE: for everything to work properly, task title should be
 // kept unique
-export async function taskFill(tit, desc, hours, mins, repNum, updt, repType) {
+export async function taskFill(
+  tit,
+  desc,
+  hours,
+  mins,
+  repNum,
+  updt,
+  repType,
+  repWDays
+) {
   await hasTxt('Task', titBarIds.titText);
 
   // NOTE: this currently works only with the default
@@ -182,6 +194,15 @@ export async function taskFill(tit, desc, hours, mins, repNum, updt, repType) {
     }
   }
 
+  if (repWDays) {
+    await pressItem(repCompIds.repCheck);
+    await pressItem(repCompIds.repWeek);
+    for (let i = 0; i < repWDays.length; i++) {
+      const wName = repWDays[i];
+      await pressItem(repCompIds.repWDay(wName));
+    }
+  }
+
   await replaceTxt(taskIds.titInp, tit);
   if (desc) {
     await replaceTxt(taskIds.descInp, desc);
@@ -204,12 +225,13 @@ export async function taskFillNav(
   hours,
   mins,
   repNum,
-  repType
+  repType,
+  repWDays
 ) {
   if (navId) {
     await navigate(navId);
   }
 
   await pressItem(appIds.floatAdd);
-  await taskFill(tit, desc, hours, mins, repNum, false, repType);
+  await taskFill(tit, desc, hours, mins, repNum, false, repType, repWDays);
 }

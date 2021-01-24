@@ -47,6 +47,7 @@ export class RepeatComp extends React.Component {
                 <View style={repComp.repContainer}>
                   {wDays.map((day) => (
                     <CircleCheck
+                      testID={repCompIds.repWDay(day.title)}
                       key={day.key}
                       defValue={this.props.weeklyVals.indexOf(day.title) !== -1}
                       onCheck={() => this.props.onWDayCheck(day.title)}

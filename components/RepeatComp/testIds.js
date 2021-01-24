@@ -4,4 +4,5 @@ export const repCompIds = {
   repDD: 'repDD',
   repPer: 'repPer',
   repWeek: 'repWeek',
+  repWDay: (day) => `repWDay-${day}`,
 };

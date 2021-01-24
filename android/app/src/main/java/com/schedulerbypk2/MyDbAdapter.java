@@ -1,4 +1,4 @@
-package com.schedulerbypk2.debug;
+package com.schedulerbypk2;
 
 import com.facebook.react.bridge.WritableArray;
 import com.facebook.react.bridge.Arguments;

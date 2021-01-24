@@ -1,4 +1,10 @@
-import { elVis, hasTxt, pressItem, waitElVis } from './testSteps/general';
+import {
+  containTxt,
+  elVis,
+  hasTxt,
+  pressItem,
+  waitElVis,
+} from './testSteps/general';
 import { openApp } from './general';
 import { autoFillDDInp } from './fill';
 /* utils */
@@ -18,7 +24,7 @@ export async function navigate(actId) {
   const titleTxt = getTitText(actId);
   await elVis(actId);
   await pressItem(actId);
-  await hasTxt(titleTxt, titBarIds.titText);
+  await containTxt(titleTxt, titBarIds.titText);
 }
 
 // assumes that day task list is already viewable
@@ -40,7 +46,7 @@ export async function navToDay(year, month, day, noMenNav) {
   if (!noMenNav) {
     await navigate(actMenIds.todAct);
 
-    await hasTxt('Today', titBarIds.titText);
+    await containTxt('Today', titBarIds.titText);
   }
 
   const monthName = monthData[parseInt(month, 10)].title;

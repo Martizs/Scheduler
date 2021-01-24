@@ -1,4 +1,10 @@
-import { containTxt, hasTxt, pressItem, scrollTo } from './testSteps/general';
+import {
+  containTxt,
+  hasTxt,
+  pressItem,
+  scrollTo,
+  waitElVis,
+} from './testSteps/general';
 import { editTaskNav, navigate } from './nav';
 import { remFill, taskFill } from './fill';
 /* consts */
@@ -7,6 +13,8 @@ import { titBarIds } from './../../components/TitleBar/testIds';
 import { remIds } from '../../screens/Reminder/testIds';
 import { taskIds } from '../../screens/Task/testIds';
 import { actMenIds } from '../../screens/ActionMenu/testIds';
+import { tItemIds } from '../../components/TaskItem/testIds';
+import { dropDownIds } from '../../components/DropDownList/testIds';
 
 // update reminder helper
 // NOTE: already assumes that the Day task list is opened
@@ -111,4 +119,15 @@ export async function updateTaskRem(
   );
 
   await hasTxt('Calendar', titBarIds.titText);
+}
+
+// moves an item to tommorow and assumes that
+// day task list is present
+export async function moveItemTomorow(taskTitle) {
+  await pressItem(`${tItemIds.optBut}-${taskTitle}`);
+
+  // we wait for the options first item to appear
+  await waitElVis(dropDownIds.ddItem(0), 3000);
+
+  await pressItem(dropDownIds.ddItem(1));
 }

@@ -132,6 +132,7 @@ class TaskItem extends React.Component {
 
           <TouchableOpacity
             testID={`${tItemIds.mainBut}-${item.title}`}
+            disabled={this.props.item.invisible}
             style={taskItem.textBut}
             activeOpacity={
               (this.props.noDetail && !!this.props.onItemPress) ||
@@ -156,6 +157,7 @@ class TaskItem extends React.Component {
               </Text>
             )}
             <Text
+              testID={`${tItemIds.titText}-${item.title}`}
               style={{
                 ...taskItem.titleText,
                 ...textStyle,
@@ -168,7 +170,7 @@ class TaskItem extends React.Component {
           <TouchableOpacity
             testID={`${tItemIds.optBut}-${item.title}`}
             style={optButStyle}
-            disabled={noOptions}
+            disabled={noOptions || this.props.item.invisible}
             ref={(ref) => {
               this.optionsRef = ref;
             }}
@@ -200,7 +202,10 @@ class TaskItem extends React.Component {
             )}
             <View style={taskItem.descWrapper}>
               <Text style={taskItem.detTitle}>{item.title}</Text>
-              <Text style={taskItem.descText}>
+              <Text
+                style={taskItem.descText}
+                testID={`${tItemIds.descText}-${item.title}`}
+              >
                 {item.description || 'No description'}
               </Text>
             </View>

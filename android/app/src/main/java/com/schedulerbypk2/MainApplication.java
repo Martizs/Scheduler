@@ -1,4 +1,4 @@
-package com.schedulerbypk2.debug;
+package com.schedulerbypk2;
 
 import android.app.Application;
 import android.content.Context;
@@ -19,9 +19,9 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.List;
 // external packages
 
-import com.schedulerbypk2.debug.ScheduleTimePackage;
-import com.schedulerbypk2.debug.DatabasePackage;
-import com.schedulerbypk2.debug.NativeTestPackage;
+import com.schedulerbypk2.ScheduleTimePackage;
+import com.schedulerbypk2.DatabasePackage;
+import com.schedulerbypk2.NativeTestPackage;
 
 /* tests */
 import androidx.lifecycle.LifecycleObserver;

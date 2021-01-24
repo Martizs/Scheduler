@@ -599,7 +599,7 @@ class Reminder extends React.Component {
                       };
                     })
                   }
-                  testID={remIds.testCheck}
+                  testID={`${remIds.testCheck}-${this.state.testCheck}`}
                 >
                   <CheckBox
                     value={this.state.testCheck}

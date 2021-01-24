@@ -1,6 +1,11 @@
 // KEYWORDS - ADD
 import { remFill, taskFillNav } from './fill';
-import { hasTxt, pressItem, waitElNotVis } from './testSteps/general';
+import {
+  containTxt,
+  hasTxt,
+  pressItem,
+  waitElNotVis,
+} from './testSteps/general';
 import { dismissNotif } from './general';
 import { remTask } from './remove';
 import { checkNotif } from './check';
@@ -22,11 +27,21 @@ export async function addTask(
   tHours,
   tMins,
   repNum,
-  repType
+  repType,
+  repWDays
 ) {
-  await taskFillNav(navId, title, desc, tHours, tMins, repNum, repType);
+  await taskFillNav(
+    navId,
+    title,
+    desc,
+    tHours,
+    tMins,
+    repNum,
+    repType,
+    repWDays
+  );
   await pressItem(taskIds.addBut);
-  await hasTxt(getTitText(navId), titBarIds.titText);
+  await containTxt(getTitText(navId), titBarIds.titText);
 }
 
 // already assumes that its able to press on the
@@ -71,9 +86,10 @@ export async function addItemRem(
   repNum,
   repRem,
   testCheck,
-  befType
+  befType,
+  repWDays
 ) {
-  await taskFillNav(navId, title, desc, tHours, tMins, repNum);
+  await taskFillNav(navId, title, desc, tHours, tMins, repNum, false, repWDays);
   if (sameTime > 0) {
     if (tHours?.length && tMins?.length) {
       // so if its NOT an on time reminder and the task
@@ -99,7 +115,7 @@ export async function addItemRem(
   await pressItem(taskIds.addBut);
 
   if (navId) {
-    await hasTxt(getTitText(navId), titBarIds.titText);
+    await containTxt(getTitText(navId), titBarIds.titText);
   }
 }
 

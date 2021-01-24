@@ -15,6 +15,7 @@ import {
   waitElNotVis,
   scrollTo,
   scrollToEnd,
+  containTxt,
 } from './testSteps/general';
 /* utils */
 import { getTitText } from './utils/general';
@@ -24,7 +25,7 @@ export async function remTask(navId, taskTitle, rep, viaOpts, lPress) {
   if (navId) {
     await navigate(navId);
     // we wait to be redirected to the previous screen
-    await hasTxt(getTitText(navId), titBarIds.titText);
+    await containTxt(getTitText(navId), titBarIds.titText);
   }
 
   // so we open up the task item options
@@ -41,7 +42,7 @@ export async function remTask(navId, taskTitle, rep, viaOpts, lPress) {
 
   if (viaOpts) {
     // and then we press on the second option to remove the task
-    await pressItem(dropDownIds.ddItem(1));
+    await pressItem(dropDownIds.ddItem(2));
 
     if (rep) {
       await waitElVis(appIds.modBut(0), 3000);
@@ -75,7 +76,7 @@ export async function remTask(navId, taskTitle, rep, viaOpts, lPress) {
 
     if (navId) {
       // we wait to be redirected to the previous screen
-      await hasTxt(getTitText(navId), titBarIds.titText);
+      await containTxt(getTitText(navId), titBarIds.titText);
     }
 
     // and to make sure that it has been removed we wait for the task title to NOT be visible
