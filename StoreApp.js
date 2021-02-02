@@ -1,6 +1,6 @@
 import React from 'react';
-import {initStore} from './redux/store';
-import {Provider} from 'react-redux';
+import { initStore } from './redux/store';
+import { Provider } from 'react-redux';
 import AppAlarm from './AppAlarm';
 
 export const store = initStore();

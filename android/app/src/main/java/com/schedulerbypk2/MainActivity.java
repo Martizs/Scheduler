@@ -1,4 +1,4 @@
-package com.schedulerbypk2;
+package com.schedulerbypk2.debug;
 
 import com.facebook.react.ReactActivity;
 import com.facebook.react.ReactActivityDelegate;
@@ -18,7 +18,7 @@ public class MainActivity extends ReactActivity {
 
   static boolean active = false;
 
-  public static String CHANNEL_ID = "com.schedulerbypk2";
+  public static String CHANNEL_ID = "com.schedulerbypk2.debug";
 
   @Override
   public void onCreate(Bundle savedInstanceState) {
@@ -44,7 +44,7 @@ public class MainActivity extends ReactActivity {
     // the NotificationChannel class is new and not in the support library
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
       int importance = NotificationManager.IMPORTANCE_HIGH;
-      NotificationChannel channel = new NotificationChannel(CHANNEL_ID, "com.schedulerbypk2", importance);
+      NotificationChannel channel = new NotificationChannel(CHANNEL_ID, "com.schedulerbypk2.debug", importance);
       NotificationManager notificationManager = getSystemService(NotificationManager.class);
       if(notificationManager != null){
         notificationManager.createNotificationChannel(channel);
@@ -67,7 +67,7 @@ public class MainActivity extends ReactActivity {
       active = false;
   }
 
-  public static class AlarmActivityDelegate extends ReactActivityDelegate {
+  public class AlarmActivityDelegate extends ReactActivityDelegate {
     private static final String RNG_CODE = "rngCode";
     private static final String ERROR = "error";
     private static final String MAIN_TIME_ID = "mainTimeId";
@@ -125,7 +125,6 @@ public class MainActivity extends ReactActivity {
   protected ReactActivityDelegate createReactActivityDelegate() {
     return new AlarmActivityDelegate(this, getMainComponentName());
   }
-
 
   /**
    * Returns the name of the main component registered from JavaScript. This is used to schedule

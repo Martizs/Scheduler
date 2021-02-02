@@ -137,7 +137,7 @@ android {
         // TODO: remove the .debug part for releases
         // TODO: basically change this and all java files you've made including the android manifest xml
         //       from 'com.schedulerbypk2.debug' to 'com.schedulerbypk2'
-        applicationId "com.schedulerbypk2"
+        applicationId "com.schedulerbypk2.debug"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
         versionCode 1
@@ -203,6 +203,8 @@ dependencies {
     implementation fileTree(dir: "libs", include: ["*.jar"])
     //noinspection GradleDynamicVersion
     implementation "com.facebook.react:react-native:+"  // From node_modulesc
+    // https://github.com/wix/react-native-interactable
+    implementation project(path: ":react-native-interactable")
 
     implementation "androidx.swiperefreshlayout:swiperefreshlayout:1.0.0"
 

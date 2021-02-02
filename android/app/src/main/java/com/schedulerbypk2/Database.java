@@ -1,4 +1,4 @@
-package com.schedulerbypk2;
+package com.schedulerbypk2.debug;
 
 // bridge imports
 import com.facebook.react.bridge.ReactApplicationContext;
@@ -109,9 +109,9 @@ public class Database extends ReactContextBaseJavaModule {
     }
 
     @ReactMethod
-    public void formatNamedDate(String year, String month, String day, boolean alterName, Callback successCallback, Callback errorCallback) {
+    public void formatNamedDate(String year, String month, String day, boolean adjDateName, boolean alterName, Callback successCallback, Callback errorCallback) {
         try {
-            successCallback.invoke(Utils.formatNamedDate(year, month, day, false, alterName));
+            successCallback.invoke(Utils.formatNamedDate(year, month, day, adjDateName, alterName));
         } catch(Exception e) {
             errorCallback.invoke("Error naming date" + e.getMessage());
         }

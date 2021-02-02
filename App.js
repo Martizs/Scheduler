@@ -62,7 +62,12 @@ import {
   clearExtraInfo,
   setInitDate,
 } from './redux/general/actions';
-import { setSelSpecDay, setSelMonth, setSelYear } from './redux/dates/actions';
+import {
+  setSelSpecDay,
+  setSelMonth,
+  setSelYear,
+  genYearDDData,
+} from './redux/dates/actions';
 /* database */
 import { createDb } from './database';
 import { dispatchDbCall } from './database/helpers';
@@ -99,6 +104,7 @@ class App extends React.Component {
     this._handleAppStateChange = this._handleAppStateChange.bind(this);
     this.setInitSelDay = this.setInitSelDay.bind(this);
     this.setScreenTitle = this.setScreenTitle.bind(this);
+    this.setInitMY = this.setInitMY.bind(this);
   }
 
   componentDidMount() {
@@ -139,6 +145,7 @@ class App extends React.Component {
     }
 
     // testModal(this.props.dispatch);
+    this.props.dispatch(genYearDDData());
   }
 
   componentDidUpdate(prevProps) {
@@ -203,10 +210,7 @@ class App extends React.Component {
       }
 
       genDays({ day, month, year }, false, this.props.dispatch);
-      this.setState({
-        initMonth: month,
-        initYear: year,
-      });
+      this.setInitMY(month, year);
       if (this.props.initDate) {
         this.props.dispatch(setInitDate(null));
       }
@@ -215,16 +219,15 @@ class App extends React.Component {
 
   _handleAppStateChange(nextAppState) {
     if (nextAppState === 'active') {
-      console.log('app active');
-      // TODO: check if this does not fuk up
-      // when you've removed the initial screen function
-      // and set up the default homescreen
-      // try changing app states when the following months
-      // day has been selected and see if nothign fuks up in
-      // task preview and calendar comp
-      // this.props.dispatch(initScreen());
-      // this.setInitSelDay(true);
+      this.props.dispatch(genYearDDData());
     }
+  }
+
+  setInitMY(month, year) {
+    this.setState({
+      initMonth: month,
+      initYear: year,
+    });
   }
 
   changeDimensions = (e) => {
@@ -279,6 +282,7 @@ class App extends React.Component {
                   key="0"
                   initMonth={this.state.initMonth}
                   initYear={this.state.initYear}
+                  setInitMY={this.setInitMY}
                 />
               ),
               title: MONTH,

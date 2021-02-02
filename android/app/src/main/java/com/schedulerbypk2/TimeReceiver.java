@@ -1,4 +1,4 @@
-package com.schedulerbypk2;
+package com.schedulerbypk2.debug;
 
 /* React native */
 import com.facebook.react.modules.core.DeviceEventManagerModule;

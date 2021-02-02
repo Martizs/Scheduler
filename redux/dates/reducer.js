@@ -73,7 +73,37 @@ const calDays = (state = calDaysInit, action) => {
   return state;
 };
 
+// current selected day reducer
+const yearDDDataState = [];
+
+const yearDDData = (state = yearDDDataState, action) => {
+  if (action.type === actions.GEN_YEAR_DD_DATA) {
+    const currDate = new Date();
+
+    // try turning this into the release year
+    // of your app or better yet, just always keep this
+    // as the current year, no reason for the user
+    // to go into the past
+    let startYear = currDate.getFullYear() - 1;
+
+    const yearData = [];
+
+    for (let i = startYear; i < currDate.getFullYear() + 4; i++) {
+      yearData.push({
+        key: i + '',
+        title: i + '',
+        value: i,
+      });
+    }
+
+    return yearData;
+  }
+
+  return state;
+};
+
 export default {
   selDay,
   calDays,
+  yearDDData,
 };

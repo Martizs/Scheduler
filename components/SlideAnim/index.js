@@ -1,14 +1,14 @@
 /* base */
 import React from 'react';
-import {View, Animated, Dimensions} from 'react-native';
+import { View, Animated, Dimensions } from 'react-native';
 /* styles */
-import {slideAnim} from './style';
+import { slideAnim } from './style';
 /* redux */
-import {connect} from 'react-redux';
+import { connect } from 'react-redux';
 /* utils */
 import isEqual from 'lodash/isEqual';
 
-const {width: initWidth} = Dimensions.get('window');
+const { width: initWidth } = Dimensions.get('window');
 
 class SlideAnim extends React.Component {
   constructor(props) {
@@ -38,7 +38,7 @@ class SlideAnim extends React.Component {
       this.props.screenOrient.eventChange &&
       !isEqual(
         this.props.screenOrient.eventChange.window,
-        prevProps.screenOrient.eventChange.window,
+        prevProps.screenOrient.eventChange.window
       )
     ) {
       this.changeDimensions(this.props.screenOrient.eventChange);
@@ -46,8 +46,8 @@ class SlideAnim extends React.Component {
   }
 
   changeDimensions(e) {
-    const {width} = e.window;
-    this.setState({width});
+    const { width } = e.window;
+    this.setState({ width });
   }
 
   slideIn = () => {
@@ -75,8 +75,9 @@ class SlideAnim extends React.Component {
         <Animated.View
           style={{
             ...slideAnim.style,
-            transform: [{translateX: right}],
-          }}>
+            transform: [{ translateX: right }],
+          }}
+        >
           {this.props.children}
         </Animated.View>
       </View>
@@ -84,7 +85,7 @@ class SlideAnim extends React.Component {
   }
 }
 
-const mapStateToProps = state => ({
+const mapStateToProps = (state) => ({
   screenOrient: state.screenOrient,
 });
 

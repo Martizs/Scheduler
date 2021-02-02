@@ -261,24 +261,6 @@ export const minutesRev = [
   { key: '00', title: '00', value: '00' },
 ];
 
-const currDate = new Date();
-
-// try turning this into the release year
-// of your app or better yet, just always keep this
-// as the current year, no reason for the user
-// to go into the past
-const startYear = 2020;
-
-export const yearData = [];
-
-for (let i = startYear; i < currDate.getFullYear() + 101; i++) {
-  yearData.push({
-    key: i + '',
-    title: i + '',
-    value: i,
-  });
-}
-
 export const defDays = [];
 
 for (let i = 1; i < 43; i++) {

@@ -8,78 +8,95 @@ import {
 } from '../../../../styles/generalStyles';
 import { highLight, calSelHighLight } from '../../../../styles/theme';
 import { calDay } from './style';
+/* utils */
+import isEqual from 'lodash/isEqual';
 
 const taskBackground = require('../../../../icons/whitTaskBackground.png');
 
-export const CalDay = (props) => {
-  let contStyle = calDay.container;
-  let imgWrapper = calDay.imgWrapper;
+export class CalDay extends React.Component {
+  shouldComponentUpdate(prevProps) {
+    if (
+      this.props.selected !== prevProps.selected ||
+      this.props.smallItems !== prevProps.smallItems ||
+      this.props.tasks !== prevProps.tasks ||
+      !isEqual(this.props.item, prevProps.item)
+    ) {
+      return true;
+    }
 
-  if (props.opaque) {
-    contStyle = {
-      ...contStyle,
-      opacity: 0.4,
-    };
+    return false;
   }
 
-  if (props.smallItems) {
-    imgWrapper = {
-      ...imgWrapper,
-      paddingTop: RFValue(2),
-      paddingBottom: RFValue(2),
-    };
-  }
+  render() {
+    let contStyle = calDay.container;
+    let imgWrapper = calDay.imgWrapper;
 
-  if (props.today) {
-    contStyle = {
-      ...contStyle,
-      borderColor: highLight,
-      borderWidth: 2,
-    };
-  }
+    if (this.props.item.opaque) {
+      contStyle = {
+        ...contStyle,
+        opacity: 0.4,
+      };
+    }
 
-  if (props.selected) {
-    contStyle = {
-      ...contStyle,
-      borderColor: calSelHighLight,
-      opacity: 1,
-      borderWidth: 2,
-    };
-  }
+    if (this.props.smallItems) {
+      imgWrapper = {
+        ...imgWrapper,
+        paddingTop: RFValue(2),
+        paddingBottom: RFValue(2),
+      };
+    }
 
-  let textStyle = smallTextCont.style;
+    if (this.props.item.today) {
+      contStyle = {
+        ...contStyle,
+        borderColor: highLight,
+        borderWidth: 2,
+      };
+    }
 
-  if (props.weekDay) {
-    textStyle = { ...ultraSmTextCont.style };
-    contStyle = {
-      ...contStyle,
-      borderLeftWidth: 0,
-      borderRightWidth: 0,
-    };
-    imgWrapper = {
-      ...imgWrapper,
-      paddingBottom: 2,
-      paddingTop: 2,
-    };
-  }
+    if (this.props.selected) {
+      contStyle = {
+        ...contStyle,
+        borderColor: calSelHighLight,
+        opacity: 1,
+        borderWidth: 2,
+      };
+    }
 
-  const imgSource = props.tasks ? taskBackground : undefined;
+    let textStyle = smallTextCont.style;
 
-  return (
-    <View style={contStyle} key={props.index}>
-      <TouchableOpacity
-        style={calDay.butContainer}
-        disabled={props.weekDay}
-        onPress={() => props.onPress()}
-      >
-        <ImageBackground
-          style={imgWrapper}
-          imageStyle={calDay.imgStyle}
-          source={imgSource}
+    if (this.props.item.weekDay) {
+      textStyle = { ...ultraSmTextCont.style };
+      contStyle = {
+        ...contStyle,
+        borderLeftWidth: 0,
+        borderRightWidth: 0,
+      };
+      imgWrapper = {
+        ...imgWrapper,
+        paddingBottom: 2,
+        paddingTop: 2,
+      };
+    }
+
+    const imgSource = this.props.tasks ? taskBackground : undefined;
+
+    return (
+      <View style={contStyle} key={this.props.item.key}>
+        <TouchableOpacity
+          style={calDay.butContainer}
+          disabled={this.props.item.weekDay}
+          onPress={() => this.props.onPress()}
         >
-          <Text style={textStyle}>{props.item}</Text>
-        </ImageBackground>
-      </TouchableOpacity>
-    </View>
-  );
-};
+          <ImageBackground
+            style={imgWrapper}
+            imageStyle={calDay.imgStyle}
+            source={imgSource}
+          >
+            <Text style={textStyle}>{this.props.item.title}</Text>
+          </ImageBackground>
+        </TouchableOpacity>
+      </View>
+    );
+  }
+}

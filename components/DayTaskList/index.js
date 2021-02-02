@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Dimensions, FlatList, Text, ToastAndroid } from 'react-native';
+import { View, Dimensions, FlatList, Text } from 'react-native';
 /* styles */
 import { dTasks, ddListWidth } from './style';
 import {
@@ -59,6 +59,7 @@ import {
   sortTasks,
   getSortParams,
   linkedSorting,
+  toastMessage,
 } from '../../utils/generalUtils';
 /* database */
 import { createRep } from '../../database';
@@ -417,13 +418,11 @@ class DayTaskList extends React.Component {
             }
             this.setState({ taskData: newTaskData });
           } else {
-            ToastAndroid.showWithGravityAndOffset(
+            toastMessage(
               'Some error occured while deleting the task, please report it',
-              ToastAndroid.LONG,
-              ToastAndroid.BOTTOM,
-              0,
-              50
+              true
             );
+
             console.log(
               'deleted time task id not found in the taskData state wut? id: ',
               key
@@ -511,12 +510,9 @@ class DayTaskList extends React.Component {
           repParsed.type &&
           (repParsed.number || repParsed.values)
         ) {
-          ToastAndroid.showWithGravityAndOffset(
+          toastMessage(
             'Task will be turned into a single task once moved',
-            ToastAndroid.LONG,
-            ToastAndroid.BOTTOM,
-            0,
-            50
+            true
           );
         }
         break;
@@ -570,13 +566,6 @@ class DayTaskList extends React.Component {
           });
         },
         (err) => {
-          ToastAndroid.showWithGravityAndOffset(
-            'Some error occured while checking the task, please report it',
-            ToastAndroid.LONG,
-            ToastAndroid.BOTTOM,
-            0,
-            50
-          );
           console.log(err);
         }
       )
@@ -809,6 +798,15 @@ class DayTaskList extends React.Component {
         }}
         collapsable={false}
         style={dTasks.container}
+        onLayout={(event) => {
+          // NOTE: as far as i've checked this does not get called with animation.event
+          // changing its height value
+          // console.log('layout change', event.nativeEvent.layout.height);
+
+          if (!this.props.listHeight && !!this.props.setListHeight) {
+            this.props.setListHeight(event.nativeEvent.layout.height);
+          }
+        }}
       >
         {!this.props.taskPrev && (
           <DaySelection

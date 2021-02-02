@@ -10,189 +10,214 @@ import { switchScreen } from '../../../../redux/general/actions';
 import { setSelDay } from '../../../../redux/dates/actions';
 /* consts */
 import { DAY } from '../../../../consts/generalConsts';
+/* utils */
+import isEqual from 'lodash/isEqual';
+import { daysEqual } from '../../utils';
 
-const CalGrid = (props) => {
-  const [gridHeight, setGridHeight] = React.useState(290);
+class CalGrid extends React.Component {
+  constructor(props) {
+    super();
 
-  React.useEffect(() => {
-    setGridHeight(props.calHeight - props.headHeight - 5);
-  }, [props.calHeight, props.headHeight]);
+    this.state = {
+      gridHeight: 290,
+      row1: [],
+      row2: [],
+      row3: [],
+      row4: [],
+      row5: [],
+      row6: [],
+      row7: [],
+    };
 
-  const tablContainer = {
-    height: gridHeight,
-  };
+    this.pressSelDay = this.pressSelDay.bind(this);
+    this.genDays = this.genDays.bind(this);
+  }
 
-  const genTable = () => {
-    const row1 = props.calDays.slice(0, 7);
-    const row2 = props.calDays.slice(7, 14);
-    const row3 = props.calDays.slice(14, 21);
-    const row4 = props.calDays.slice(21, 28);
-    const row5 = props.calDays.slice(28, 35);
-    const row6 = props.calDays.slice(35, 42);
-    const row7 = props.calDays.slice(42, 49);
+  componentDidMount() {
+    this.genDays();
+  }
+
+  componentDidUpdate(prevProps) {
+    if (
+      this.props.calHeight !== prevProps.calHeight ||
+      this.props.headHeight !== prevProps.headHeight
+    ) {
+      this.setState({
+        gridHeight: this.props.calHeight - this.props.headHeight - 5,
+      });
+    }
+
+    if (!isEqual(this.props.calDaysChange, prevProps.calDaysChange)) {
+      this.genDays();
+    }
+  }
+
+  genDays() {
+    const { calDays } = this.props;
+    if (calDays) {
+      const row1 = calDays.slice(0, 7);
+      const row2 = calDays.slice(7, 14);
+      const row3 = calDays.slice(14, 21);
+      const row4 = calDays.slice(21, 28);
+      const row5 = calDays.slice(28, 35);
+      const row6 = calDays.slice(35, 42);
+      const row7 = calDays.slice(42, 49);
+
+      this.setState({ row1, row2, row3, row4, row5, row6, row7 });
+    }
+  }
+
+  pressSelDay(dayItem) {
+    if (!this.props.move && daysEqual(dayItem, this.props.selDay)) {
+      this.props.dispatch(switchScreen(DAY));
+    } else {
+      // selDay items here are also numbers
+      // as the data passed in is generated in
+      // genCalDays and we have only numbers there
+      // for year month day
+      this.props.dispatch(setSelDay(dayItem));
+    }
+  }
+
+  render() {
+    const { row1, row2, row3, row4, row5, row6, row7, gridHeight } = this.state;
 
     const firstRowSt = {
       ...calGrid.rowContainer,
       height: '10%',
     };
 
-    const daysEqual = (dayItem) => {
-      const { day, month, year } = props.selDay;
-      return (
-        dayItem.day === day && dayItem.month === month && dayItem.year === year
-      );
-    };
-
-    const pressSelDay = (dayItem) => {
-      if (!props.move && daysEqual(dayItem)) {
-        props.dispatch(switchScreen(DAY));
-      } else {
-        // selDay items here are also numbers
-        // as the data passed in is generated in
-        // genCalDays and we have only numbers there
-        // for year month day
-        props.dispatch(setSelDay(dayItem));
-      }
+    const tablContainer = {
+      height: gridHeight,
     };
 
     return (
-      <View style={tablContainer} key="row-1">
-        <View style={firstRowSt}>
-          {row1.map((item) => (
-            <CalDay
-              tasks={
-                item.title === '23' || item.title === '24' || item.title === '5'
-              }
-              opaque={item.opaque}
-              today={item.today}
-              selected={daysEqual(item)}
-              item={item.title}
-              index={item.key}
-              key={item.key}
-              weekDay={item.weekDay}
-              smallItems={!props.portrait}
-              onPress={() => pressSelDay(item)}
-            />
-          ))}
-        </View>
-        <View style={calGrid.rowContainer} key="row-2">
-          {row2.map((item) => (
-            <CalDay
-              tasks={
-                item.title === '23' || item.title === '24' || item.title === '5'
-              }
-              opaque={item.opaque}
-              today={item.today}
-              selected={daysEqual(item)}
-              item={item.title}
-              index={item.key}
-              key={item.key}
-              weekDay={item.weekDay}
-              smallItems={!props.portrait}
-              onPress={() => pressSelDay(item)}
-            />
-          ))}
-        </View>
-        <View style={calGrid.rowContainer} key="row-3">
-          {row3.map((item) => (
-            <CalDay
-              tasks={
-                item.title === '23' || item.title === '24' || item.title === '5'
-              }
-              opaque={item.opaque}
-              today={item.today}
-              selected={daysEqual(item)}
-              item={item.title}
-              index={item.key}
-              key={item.key}
-              weekDay={item.weekDay}
-              smallItems={!props.portrait}
-              onPress={() => pressSelDay(item)}
-            />
-          ))}
-        </View>
-        <View style={calGrid.rowContainer} key="row-4">
-          {row4.map((item) => (
-            <CalDay
-              tasks={
-                item.title === '23' || item.title === '24' || item.title === '5'
-              }
-              opaque={item.opaque}
-              today={item.today}
-              selected={daysEqual(item)}
-              item={item.title}
-              index={item.key}
-              key={item.key}
-              weekDay={item.weekDay}
-              smallItems={!props.portrait}
-              onPress={() => pressSelDay(item)}
-            />
-          ))}
-        </View>
-        <View style={calGrid.rowContainer} key="row-5">
-          {row5.map((item) => (
-            <CalDay
-              tasks={
-                item.title === '23' || item.title === '24' || item.title === '5'
-              }
-              opaque={item.opaque}
-              today={item.today}
-              selected={daysEqual(item)}
-              item={item.title}
-              index={item.key}
-              key={item.key}
-              weekDay={item.weekDay}
-              smallItems={!props.portrait}
-              onPress={() => pressSelDay(item)}
-            />
-          ))}
-        </View>
-        <View style={calGrid.rowContainer} key="row-6">
-          {row6.map((item) => (
-            <CalDay
-              tasks={
-                item.title === '23' || item.title === '24' || item.title === '5'
-              }
-              opaque={item.opaque}
-              today={item.today}
-              selected={daysEqual(item)}
-              item={item.title}
-              index={item.key}
-              key={item.key}
-              weekDay={item.weekDay}
-              smallItems={!props.portrait}
-              onPress={() => pressSelDay(item)}
-            />
-          ))}
-        </View>
-        <View style={calGrid.rowContainer} key="row-7">
-          {row7.map((item) => (
-            <CalDay
-              tasks={
-                item.title === '23' || item.title === '24' || item.title === '5'
-              }
-              opaque={item.opaque}
-              today={item.today}
-              selected={daysEqual(item)}
-              item={item.title}
-              index={item.key}
-              key={item.key}
-              weekDay={item.weekDay}
-              smallItems={!props.portrait}
-              onPress={() => pressSelDay(item)}
-            />
-          ))}
-        </View>
+      <View style={calGrid.container}>
+        {this.props.calDays && (
+          <View style={tablContainer} key="row-1">
+            <View style={firstRowSt}>
+              {row1.map((item) => (
+                <CalDay
+                  tasks={
+                    item.title === '23' ||
+                    item.title === '24' ||
+                    item.title === '5'
+                  }
+                  selected={daysEqual(item, this.props.selDay)}
+                  item={item}
+                  key={item.key}
+                  smallItems={!this.props.portrait}
+                  onPress={() => this.pressSelDay(item)}
+                />
+              ))}
+            </View>
+            <View style={calGrid.rowContainer} key="row-2">
+              {row2.map((item) => (
+                <CalDay
+                  tasks={
+                    item.title === '23' ||
+                    item.title === '24' ||
+                    item.title === '5'
+                  }
+                  selected={daysEqual(item, this.props.selDay)}
+                  item={item}
+                  key={item.key}
+                  smallItems={!this.props.portrait}
+                  onPress={() => this.pressSelDay(item)}
+                />
+              ))}
+            </View>
+            <View style={calGrid.rowContainer} key="row-3">
+              {row3.map((item) => (
+                <CalDay
+                  tasks={
+                    item.title === '23' ||
+                    item.title === '24' ||
+                    item.title === '5'
+                  }
+                  selected={daysEqual(item, this.props.selDay)}
+                  item={item}
+                  key={item.key}
+                  smallItems={!this.props.portrait}
+                  onPress={() => this.pressSelDay(item)}
+                />
+              ))}
+            </View>
+            <View style={calGrid.rowContainer} key="row-4">
+              {row4.map((item) => (
+                <CalDay
+                  tasks={
+                    item.title === '23' ||
+                    item.title === '24' ||
+                    item.title === '5'
+                  }
+                  selected={daysEqual(item, this.props.selDay)}
+                  item={item}
+                  key={item.key}
+                  smallItems={!this.props.portrait}
+                  onPress={() => this.pressSelDay(item)}
+                />
+              ))}
+            </View>
+            <View style={calGrid.rowContainer} key="row-5">
+              {row5.map((item) => (
+                <CalDay
+                  tasks={
+                    item.title === '23' ||
+                    item.title === '24' ||
+                    item.title === '5'
+                  }
+                  selected={daysEqual(item, this.props.selDay)}
+                  item={item}
+                  key={item.key}
+                  smallItems={!this.props.portrait}
+                  onPress={() => this.pressSelDay(item)}
+                />
+              ))}
+            </View>
+            <View style={calGrid.rowContainer} key="row-6">
+              {row6.map((item) => (
+                <CalDay
+                  tasks={
+                    item.title === '23' ||
+                    item.title === '24' ||
+                    item.title === '5'
+                  }
+                  selected={daysEqual(item, this.props.selDay)}
+                  item={item}
+                  key={item.key}
+                  smallItems={!this.props.portrait}
+                  onPress={() => this.pressSelDay(item)}
+                />
+              ))}
+            </View>
+            <View style={calGrid.rowContainer} key="row-7">
+              {row7.map((item) => (
+                <CalDay
+                  tasks={
+                    item.title === '23' ||
+                    item.title === '24' ||
+                    item.title === '5'
+                  }
+                  selected={daysEqual(item, this.props.selDay)}
+                  item={item}
+                  key={item.key}
+                  smallItems={!this.props.portrait}
+                  onPress={() => this.pressSelDay(item)}
+                />
+              ))}
+            </View>
+          </View>
+        )}
       </View>
     );
-  };
-
-  return <View style={calGrid.container}>{props.calDays && genTable()}</View>;
-};
+  }
+}
 
 const mapStateToProps = (state) => ({
   selDay: state.selDay,
   calDays: state.calDays.data,
+  calDaysChange: state.calDays.change,
 });
 
 const mapDispatchToProps = (dispatch) => ({

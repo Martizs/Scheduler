@@ -35,3 +35,9 @@ export const SET_INIT_CAL_DAYS = 'SET_INIT_CAL_DAYS';
 export function setInitCalDays() {
   return { type: SET_INIT_CAL_DAYS };
 }
+
+// Year DD Data
+export const GEN_YEAR_DD_DATA = 'GEN_YEAR_DD_DATA';
+export function genYearDDData() {
+  return { type: GEN_YEAR_DD_DATA };
+}

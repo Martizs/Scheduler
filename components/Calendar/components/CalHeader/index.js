@@ -9,7 +9,7 @@ import SearchInput from '../../../SearchInput';
 /* utils */
 import { genDays, getMonthName } from '../../../../utils/dateUtils';
 /* consts */
-import { monthData, yearData } from '../../../../consts/dateConts';
+import { monthData } from '../../../../consts/dateConts';
 /* redux */
 import { connect } from 'react-redux';
 import { setSelMonth, setSelYear } from '../../../../redux/dates/actions';
@@ -56,7 +56,7 @@ const CalHeader = (props) => {
         <SearchInput
           setDropDown={props.setYDropDown}
           itemSel={props.mainYear + ''}
-          data={yearData}
+          data={props.yearDDData}
           resetItem={props.resetYea}
           toggleResItem={props.toggleYeaRes}
           numeric
@@ -79,6 +79,7 @@ const mapStateToProps = (state) => ({
   calDays: state.calDays.data,
   mainMonth: state.calDays.mainMonth,
   mainYear: state.calDays.mainYear,
+  yearDDData: state.yearDDData,
 });
 
 const mapDispatchToProps = (dispatch) => ({

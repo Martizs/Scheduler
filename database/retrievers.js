@@ -69,7 +69,9 @@ export function getTimeTasks(dayTasks, qParams, setData) {
                 dateName = await formNamedDate(
                   timeTaskItem.year,
                   parseInt(timeTaskItem.month, 10) - 1,
-                  timeTaskItem.day
+                  timeTaskItem.day,
+                  false,
+                  true
                 ).catch((err) => {
                   console.log('formNamedDate error in getTimeTasks', err);
                 });
@@ -161,6 +163,7 @@ export function getRems(timeTaskId, extraRes, callBack, errCallback) {
               selMin: reminder.minutes,
               ring_date: reminder.ring_date,
               taskRemId: reminder.task_rem_id,
+              done: reminder.done,
               ...extraRes,
             });
           }

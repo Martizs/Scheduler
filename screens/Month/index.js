@@ -43,6 +43,7 @@ class Month extends React.Component {
       portrait: true,
       inputX: 0,
       inputY: '-100%',
+      calHeight: 0,
     };
 
     this.setCurrMY = this.setCurrMY.bind(this);
@@ -61,6 +62,13 @@ class Month extends React.Component {
   componentDidMount() {
     this.orienChanged();
     AppState.addEventListener('change', this._handleAppStateChange);
+  }
+
+  shouldComponentUpdate(prevProps) {
+    if (!isEqual(this.props.selDay, prevProps.selDay)) {
+      return false;
+    }
+    return true;
   }
 
   componentDidUpdate(prevProps) {
@@ -88,6 +96,7 @@ class Month extends React.Component {
         date.getMonth() !== monthz ||
         year !== date.getFullYear()
       ) {
+        this.props.setInitMY(monthz, year);
         this.setCurrMY();
       }
     }
@@ -182,19 +191,19 @@ class Month extends React.Component {
     genDays(
       { month: item.value, year: this.props.selDay.year },
       false,
-      this.props.dispatch
+      this.props.dispatch,
+      () => this.toggleMonRes(true)
     );
-    this.toggleMonRes(true);
   }
 
   onYItemPress(item) {
+    this.props.dispatch(setSelYear(item.value));
     genDays(
       { month: this.props.selDay.month, year: item.value },
       false,
-      this.props.dispatch
+      this.props.dispatch,
+      () => this.toggleYeaRes(true)
     );
-    this.props.dispatch(setSelYear(item.value));
-    this.toggleYeaRes(true);
   }
 
   setInputXY(inputX, y) {
@@ -293,7 +302,12 @@ class Month extends React.Component {
               />
             </View>
           )}
-          <View style={calInContainer}>
+          <View
+            style={calInContainer}
+            onLayout={(event) =>
+              this.setState({ calHeight: event.nativeEvent.layout.height })
+            }
+          >
             <Calendar
               move={move}
               resetMon={this.state.resetMon}
@@ -338,10 +352,10 @@ class Month extends React.Component {
           )}
           <View style={monthStyle.prevTaskCont}>
             <TaskPreview
+              calHeight={this.state.calHeight}
               loadInit={loadInit}
               moveItem={moveItem}
               portrait={this.state.portrait}
-              selDay={this.props.selDay}
             />
           </View>
         </View>

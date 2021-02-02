@@ -141,7 +141,7 @@ class TaskItem extends React.Component {
                 : 1
             }
             delayLongPress={500}
-            onLongPress={() => this.openMenu(item)}
+            // onLongPress={() => this.openMenu(item)}
             onPress={() =>
               details ? this.setDetails(false) : this.setDetails(true)
             }
@@ -195,6 +195,7 @@ class TaskItem extends React.Component {
           >
             {!!item.reminders?.length && (
               <RemPrev
+                taskDone={done}
                 justPreview
                 reminders={item.reminders}
                 editTask={this.props.editTask}

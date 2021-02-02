@@ -14,6 +14,8 @@ target 'SchedulerByPK2' do
 
   pod 'toolbar-android', :path => '../node_modules/@react-native-community/toolbar-android'
 
+  pod 'Interactable', :path => '../node_modules/react-native-interactable'
+
   target 'SchedulerByPK2Tests' do
     inherit! :complete
     # Pods for testing

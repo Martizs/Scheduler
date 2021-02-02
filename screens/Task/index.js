@@ -4,7 +4,6 @@ import {
   View,
   TextInput,
   Text,
-  ToastAndroid,
   ScrollView,
   Dimensions,
   TouchableOpacity,
@@ -66,7 +65,7 @@ import {
   setSelYear,
 } from '../../redux/dates/actions';
 import { genDays } from '../../utils/dateUtils';
-import { before } from 'lodash';
+import { toastMessage } from '../../utils/generalUtils';
 
 class TaskScreen extends React.Component {
   constructor(props) {
@@ -194,22 +193,18 @@ class TaskScreen extends React.Component {
     if (rem && ((prevRem && rem.change !== prevRem.change) || !prevRem)) {
       const reminders = this.state.reminders;
       const remInd = findIndex(reminders, ['id', rem.id]);
-      if (reminders.length >= 5) {
-        ToastAndroid.showWithGravityAndOffset(
-          'You cannot set more than 5 reminders for a given task',
-          ToastAndroid.SHORT,
-          ToastAndroid.BOTTOM,
-          0,
-          50
-        );
-      } else if (remInd !== -1) {
+      if (remInd !== -1) {
         if (rem.delete) {
           reminders.splice(remInd, 1);
         } else {
           reminders[remInd] = rem;
         }
       } else {
-        reminders.unshift(rem);
+        if (reminders.length >= 5) {
+          toastMessage('You cannot set more than 5 reminders for a given task');
+        } else {
+          reminders.unshift(rem);
+        }
       }
       // eslint-disable-next-line react/no-did-update-set-state
       this.setState({ reminders });
@@ -479,7 +474,7 @@ class TaskScreen extends React.Component {
       this.props.dispatch(
         toggleModal(
           'Update reminders?',
-          <InfoModalContent text="You've updated some reminders, would you like to save the changes before backing out?" />,
+          <InfoModalContent text="You've updated some reminders, save the changes?" />,
           [
             {
               title: 'Yes',
@@ -520,13 +515,7 @@ class TaskScreen extends React.Component {
     const { selHour, selMin, editAll, reminders } = this.state;
 
     if (!this.title || this.title.length === 0) {
-      ToastAndroid.showWithGravityAndOffset(
-        'Task needs a title',
-        ToastAndroid.SHORT,
-        ToastAndroid.BOTTOM,
-        0,
-        50
-      );
+      toastMessage('Task needs a title');
     } else {
       let hourz = selHour;
       let minutez = selMin;
@@ -557,25 +546,16 @@ class TaskScreen extends React.Component {
         !this.state.weeklyRep &&
         (!this.repNumber || !onlyPosNumbers || this.repNumber.charAt(0) === '0')
       ) {
-        ToastAndroid.showWithGravityAndOffset(
+        toastMessage(
           'You need to provide a valid repeat number for the repeatable task',
-          ToastAndroid.LONG,
-          ToastAndroid.BOTTOM,
-          0,
-          50
+          true
         );
       } else if (
         this.state.repTask &&
         this.state.weeklyRep &&
         !this.state.weeklyVals.length
       ) {
-        ToastAndroid.showWithGravityAndOffset(
-          'You need to select at least one week number',
-          ToastAndroid.LONG,
-          ToastAndroid.BOTTOM,
-          0,
-          50
-        );
+        toastMessage('You need to select at least one week day', true);
       } else {
         if (update) {
           dispatchDbCall(() =>
@@ -688,20 +668,14 @@ class TaskScreen extends React.Component {
 
       if (remsRemoved) {
         stateObj.reminders = newReminders;
-        ToastAndroid.showWithGravityAndOffset(
-          'Task time related reminders have been removed',
-          ToastAndroid.LONG,
-          ToastAndroid.BOTTOM,
-          0,
-          50
-        );
+        toastMessage('Task time related reminders have been removed', true);
       }
     }
     this.setState(stateObj);
   }
 
   render() {
-    const { repeatability, update } = this.props.extraInfo;
+    const { repeatability, update, done } = this.props.extraInfo;
 
     const repeatableTask = !!repeatability && !!repeatability.type;
 
@@ -802,6 +776,7 @@ class TaskScreen extends React.Component {
             />
           </ScrollView>
           <RemPrev
+            taskDone={done}
             reminders={this.state.reminders}
             addReminder={this.addEditReminder}
             editReminder={this.addEditReminder}

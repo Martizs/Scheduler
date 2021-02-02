@@ -1,4 +1,4 @@
-package com.schedulerbypk2;
+package com.schedulerbypk2.debug;
 
 import android.app.Application;
 import android.content.Context;
@@ -18,10 +18,11 @@ import com.facebook.soloader.SoLoader;
 import java.lang.reflect.InvocationTargetException;
 import java.util.List;
 // external packages
+import com.wix.interactable.Interactable;
 
-import com.schedulerbypk2.ScheduleTimePackage;
-import com.schedulerbypk2.DatabasePackage;
-import com.schedulerbypk2.NativeTestPackage;
+import com.schedulerbypk2.debug.ScheduleTimePackage;
+import com.schedulerbypk2.debug.DatabasePackage;
+import com.schedulerbypk2.debug.NativeTestPackage;
 
 /* tests */
 import androidx.lifecycle.LifecycleObserver;
@@ -51,6 +52,7 @@ public class MainApplication extends Application implements ReactApplication,Lif
           packages.add(new ScheduleTimePackage());
           packages.add(new DatabasePackage());
           packages.add(new NativeTestPackage());
+          packages.add(new Interactable());
           return packages;
         }
 
@@ -88,7 +90,7 @@ public class MainApplication extends Application implements ReactApplication,Lif
          We use reflection here to pick up the class that initializes Flipper,
         since Flipper library is not available in release mode
         */
-        Class<?> aClass = Class.forName("com.schedulerbypk2.ReactNativeFlipper");
+        Class<?> aClass = Class.forName("com.schedulerbypk2.debug.ReactNativeFlipper");
         aClass
             .getMethod("initializeFlipper", Context.class, ReactInstanceManager.class)
             .invoke(null, context, reactInstanceManager);

@@ -23,13 +23,14 @@ export function addZero(item) {
 
 // helper function to form named date
 // 'Today' 'this Wednesday' etc.
-export function formNamedDate(year, month, day, alterName) {
+export function formNamedDate(year, month, day, alterName, adjDayName) {
   return new Promise((resolve, reject) => {
     if (year !== undefined && month !== undefined && day !== undefined) {
       Database.formatNamedDate(
         addZero(year),
         addZero(month + 1),
         addZero(day),
+        !!adjDayName,
         !!alterName,
         (dateStr) => {
           resolve(dateStr);
@@ -167,7 +168,7 @@ export function genCalDays(mon, yea, forCurrMonth) {
   return { items, initDay, initToday };
 }
 
-export function genDays(selDay, daySwitch, dispatch) {
+export function genDays(selDay, daySwitch, dispatch, callBack) {
   const gen = genCalDays(selDay.month, selDay.year);
   dispatch(setCalDays(gen.items, selDay.month, selDay.year, gen.initToday));
   dispatchDbCall(() =>
@@ -182,6 +183,8 @@ export function genDays(selDay, daySwitch, dispatch) {
         // These get set as number values
         dispatch(setSelDay(gen.initDay));
       }
+
+      callBack && callBack();
     })
   );
 }

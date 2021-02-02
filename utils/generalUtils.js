@@ -1,6 +1,7 @@
 import filter from 'lodash/filter';
 import sortBy from 'lodash/sortBy';
 import findIndex from 'lodash/findIndex';
+import { ToastAndroid } from 'react-native';
 
 export function sortTasks(top, asc, data, onlyGen) {
   let genTasks = data;
@@ -197,4 +198,14 @@ export function linkedSorting(taskData) {
   }
 
   return actLinkData;
+}
+
+export function toastMessage(msg, long) {
+  ToastAndroid.showWithGravityAndOffset(
+    msg,
+    long ? ToastAndroid.LONG : ToastAndroid.SHORT,
+    ToastAndroid.BOTTOM,
+    0,
+    50
+  );
 }

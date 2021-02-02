@@ -5,7 +5,6 @@ import {
   ImageBackground,
   TouchableOpacity,
   ScrollView,
-  ToastAndroid,
   BackHandler,
   NativeEventEmitter,
   NativeModules,
@@ -38,6 +37,8 @@ import {
   setInitDate,
   setInitItemId,
 } from '../../redux/general/actions';
+/* utils */
+import { toastMessage } from '../../utils/generalUtils';
 
 class Alarm extends React.Component {
   constructor(props) {
@@ -57,13 +58,7 @@ class Alarm extends React.Component {
 
   componentDidMount() {
     if (this.props.error) {
-      ToastAndroid.showWithGravityAndOffset(
-        this.props.error,
-        ToastAndroid.LONG,
-        ToastAndroid.BOTTOM,
-        0,
-        50
-      );
+      toastMessage(this.props.error, true);
     }
     // here we cancel all other notification pending intents that might have been
     // set up, as we don't want duplicates to exist, we only use one shots
@@ -100,12 +95,9 @@ class Alarm extends React.Component {
           this.setState({ ringing });
         },
         (err) => {
-          ToastAndroid.showWithGravityAndOffset(
+          toastMessage(
             'An error occured with media player, please report it',
-            ToastAndroid.LONG,
-            ToastAndroid.BOTTOM,
-            0,
-            50
+            true
           );
           console.log(err);
         }
@@ -163,12 +155,9 @@ class Alarm extends React.Component {
             this.alarmAction(opApp);
           },
           (err) => {
-            ToastAndroid.showWithGravityAndOffset(
+            toastMessage(
               'An error occured, please report it and try removing the reminders for the task manually',
-              ToastAndroid.LONG,
-              ToastAndroid.BOTTOM,
-              0,
-              50
+              true
             );
             console.log(err);
           }
@@ -256,7 +245,7 @@ class Alarm extends React.Component {
                   Show in app
                 </Text>
               </TouchableOpacity>
-              {this.state.ringing && (
+              {/* {this.state.ringing && (
                 <TouchableOpacity
                   testID={alarmIds.stop}
                   style={{
@@ -270,7 +259,7 @@ class Alarm extends React.Component {
                     <Text style={textContainer.style}>Stop ringing</Text>
                   </View>
                 </TouchableOpacity>
-              )}
+              )} */}
               <TouchableOpacity
                 testID={alarmIds.markDone}
                 style={{

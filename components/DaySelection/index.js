@@ -7,7 +7,7 @@ import { darkBasic, interIconSize } from '../../styles/theme';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import SearchInput from '../SearchInput';
 /* consts */
-import { yearData, monthData } from '../../consts/dateConts';
+import { monthData } from '../../consts/dateConts';
 import { daySelIds } from './testIds';
 /* utils */
 import { getMonthName, genCalDays } from '../../utils/dateUtils';
@@ -59,7 +59,7 @@ const DaySelection = (props) => {
           testID={daySelIds.yearInp}
           setDropDown={props.setYDropDown}
           itemSel={year + ''}
-          data={yearData}
+          data={props.yearDDData}
           resetItem={props.resetYea}
           toggleResItem={props.toggleYeaRes}
           numeric
@@ -102,6 +102,7 @@ const DaySelection = (props) => {
 
 const mapStateToProps = (state) => ({
   selDay: state.selDay,
+  yearDDData: state.yearDDData,
 });
 
 const mapDispatchToProps = (dispatch) => ({

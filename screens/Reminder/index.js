@@ -6,7 +6,6 @@ import {
   TouchableOpacity,
   Dimensions,
   ScrollView,
-  ToastAndroid,
   Keyboard,
 } from 'react-native';
 /* styles */
@@ -56,6 +55,7 @@ import {
 import isEqual from 'lodash/isEqual';
 import { repTypeHours } from './../../consts/dateConts';
 import { environment } from '../../env';
+import { toastMessage } from '../../utils/generalUtils';
 
 class Reminder extends React.Component {
   constructor(props) {
@@ -381,23 +381,15 @@ class Reminder extends React.Component {
       repRem &&
       (!this.repNumb || !onlyPosRep || this.repNumb.charAt(0) === '0')
     ) {
-      ToastAndroid.showWithGravityAndOffset(
-        'You need to provide a valid REPEAT number for the reminder',
-        ToastAndroid.SHORT,
-        ToastAndroid.BOTTOM,
-        0,
-        50
+      toastMessage(
+        'You need to provide a valid REPEAT number for the reminder'
       );
     } else if (
       sameTime === 2 &&
       (!this.befNumb || !onlyPosBef || this.befNumb.charAt(0) === '0')
     ) {
-      ToastAndroid.showWithGravityAndOffset(
-        'You need to provide a valid BEFORE number for the reminder',
-        ToastAndroid.SHORT,
-        ToastAndroid.BOTTOM,
-        0,
-        50
+      toastMessage(
+        'You need to provide a valid BEFORE number for the reminder'
       );
     } else {
       let repeat = null;
